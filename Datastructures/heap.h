@@ -74,6 +74,7 @@ class BinaryHeap : public Heap<T> {
     }
 
     int getParent(int index) const {
+        // behaviour is only correct for nodes that have a parent (1..n), index = 0 will return -1
         return (index >> 1) - (index % 2 == 0);
     }
 
@@ -84,7 +85,7 @@ class BinaryHeap : public Heap<T> {
     }
 
     void bubbleUp(int index) {
-        // the element of the given index is "bubbled" up towards the top of the heap
+        // the element of the given index is "bubbled" up towards the top of the heap (restoring the heap property on its path)
         int parentIndex = getParent(index);
         while (index != 0 && comp(items[index], items[parentIndex])) {
             swap(index, parentIndex);
@@ -94,9 +95,9 @@ class BinaryHeap : public Heap<T> {
     }
 
     void bubbleDown(int index) {
-        // the element of the given index is "bubbled" down towards the bottom of the heap
+        // the element of the given index is "bubbled" down towards the bottom of the heap (restoring the heap property on its path)
         int childIndex = getComparatorChild(index);
-        while (comp(items[childIndex], items[index])) {
+        while (index != childIndex && comp(items[childIndex], items[index])) {
             swap(index, childIndex);
             index = childIndex;
             childIndex = getComparatorChild(childIndex);
