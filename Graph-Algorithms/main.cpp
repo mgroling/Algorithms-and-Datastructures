@@ -1,32 +1,61 @@
+#include <cassert>
 #include <functional>
 #include <iostream>
 
 #include "../Datastructures/heap.h"
-#include "graph.h"
 
 int main() {
-    // AdjacencyMatrixGraph g = AdjacencyMatrixGraph<3>(std::array<bool, 9>{true, false, true, false, true, false, false, true, true});
+    BinaryHeap<int> h = BinaryHeap<int>(std::less<int>{});
 
-    // std::vector<int> neighbours = g.getNeighbours(1);
-    // for (int i = 0; i < neighbours.size(); i++) {
-    //     std::cout << neighbours[i] << "\n";
-    // }
+    // Insert 5 unsorted numbers into the heap
+    h.insert(50);
+    h.insert(10);
+    h.insert(30);
+    h.insert(90);
+    h.insert(20);
 
-    BinaryHeap h = BinaryHeap<int>(std::less<int>{});
+    // Verify that the heap now has size 5
+    assert(h.size() == 5);
 
-    h.insert(5);
-    h.insert(4);
-    h.insert(3);
-    h.insert(7);
-    h.insert(11);
-    h.insert(1);
-    h.print();
-    std::cout << h.extract() << "\n";
-    std::cout << h.extract() << "\n";
-    std::cout << h.extract() << "\n";
-    std::cout << h.extract() << "\n";
-    std::cout << h.extract() << "\n";
-    std::cout << h.extract() << "\n";
+    // Extract the first 3 numbers from the heap
+    assert(h.extract() == 10);
+    assert(h.extract() == 20);
+    assert(h.extract() == 30);
+
+    // Verify that the heap now has size 2
+    assert(h.size() == 2);
+
+    // Insert 2 more unsorted numbers into the heap
+    h.insert(40);
+    h.insert(60);
+
+    // Verify that the heap now has size 4
+    assert(h.size() == 4);
+
+    // Extract the next 3 numbers from the heap
+    assert(h.extract() == 40);
+    assert(h.extract() == 50);
+    assert(h.extract() == 60);
+
+    // Verify that the heap now has size 1
+    assert(h.size() == 1);
+
+    // Insert 3 more unsorted numbers into the heap
+    h.insert(80);
+    h.insert(70);
+    h.insert(100);
+
+    // Verify that the heap now has size 4
+    assert(h.size() == 4);
+
+    // Extract the next 3 numbers from the heap
+    assert(h.extract() == 70);
+    assert(h.extract() == 80);
+    assert(h.extract() == 90);
+    assert(h.extract() == 100);
+
+    // Verify that the heap is now empty
+    assert(h.empty());
 
     return 0;
 }
