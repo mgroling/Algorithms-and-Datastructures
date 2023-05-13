@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include "vector"
 
 template <typename T>
@@ -16,6 +14,8 @@ class Heap {
 
 template <typename T>
 // Binary Heap that uses an array to save its elements
+// the supplied type must have the following methods implemented:
+// operator== (equals) and operator= (assignment)
 class BinaryHeap : public Heap<T> {
    public:
     // expects a comparator to compare two instances of T, giving "<" would result in a minHeap, and ">" would result in a maxHeap
