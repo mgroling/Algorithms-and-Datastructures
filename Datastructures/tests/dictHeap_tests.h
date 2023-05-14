@@ -2,8 +2,7 @@
 
 #include "../dictHeap.h"
 
-void test_binaryDictHeap_int_less() {
-    BinaryDictHeap<int> h = BinaryDictHeap<int>(true);
+void dictHeap_int_less(DictHeap<int>& h) {
     // Insert 5 unsorted numbers into the heap
     h.insert(50, 15);
     h.insert(10, 10);
@@ -66,8 +65,7 @@ void test_binaryDictHeap_int_less() {
     assert(h.empty());
 }
 
-void test_binaryDictHeap_int_greater() {
-    BinaryDictHeap<int> h = BinaryDictHeap<int>(false);
+void dictHeap_int_greater(DictHeap<int>& h) {
     // Insert 5 unsorted numbers into the heap
     h.insert(50, 200);
     h.insert(10, 10);
@@ -163,8 +161,7 @@ struct hash<MyStructDictHeap> {
 
 }  // namespace std
 
-void test_binaryDictHeap_custom_less() {
-    BinaryDictHeap<MyStructDictHeap> h = BinaryDictHeap<MyStructDictHeap>(true);
+void dictHeap_custom_less(DictHeap<MyStructDictHeap>& h) {
     // Insert 5 unsorted structs into the heap
     h.insert(MyStructDictHeap(10, 5), 35);
     h.insert(MyStructDictHeap(0, 40), 40);
@@ -189,4 +186,19 @@ void test_binaryDictHeap_custom_less() {
 
     // Verify that the heap is now empty
     assert(h.empty());
+}
+
+void test_binaryDictHeap_int_less() {
+    BinaryDictHeap<int> h = BinaryDictHeap<int>(true);
+    dictHeap_int_less(h);
+}
+
+void test_binaryDictHeap_int_greater() {
+    BinaryDictHeap<int> h = BinaryDictHeap<int>(false);
+    dictHeap_int_greater(h);
+}
+
+void test_binaryDictHeap_custom_less() {
+    BinaryDictHeap<MyStructDictHeap> h = BinaryDictHeap<MyStructDictHeap>(true);
+    dictHeap_custom_less(h);
 }

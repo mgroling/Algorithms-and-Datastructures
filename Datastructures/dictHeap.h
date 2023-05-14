@@ -57,10 +57,10 @@ class BinaryDictHeap : public DictHeap<T> {
     }
 
     void changeKey(T item, int new_priority) override {
+        // supports decrease and increase key
         if (!map.count(item)) {
             throw std::invalid_argument("Item is not present");
         }
-        // supports decrease and increase key
         int index = std::get<0>(map[item]);
         int old_priority = std::get<1>(map[item]);
         map[item] = std::tuple<int, int>{index, new_priority};

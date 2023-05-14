@@ -3,8 +3,7 @@
 
 #include "../heap.h"
 
-void test_binaryHeap_int_less() {
-    BinaryHeap<int> h = BinaryHeap<int>(std::less<int>{});
+void heap_int_less(Heap<int>& h) {
     // Insert 5 unsorted numbers into the heap
     h.insert(50);
     h.insert(10);
@@ -56,8 +55,7 @@ void test_binaryHeap_int_less() {
     assert(h.empty());
 }
 
-void test_binaryHeap_int_greater() {
-    BinaryHeap<int> h = BinaryHeap<int>(std::greater<int>{});
+void heap_int_greater(Heap<int>& h) {
     // Insert 5 unsorted numbers into the heap
     h.insert(50);
     h.insert(10);
@@ -135,8 +133,7 @@ struct MyStructHeap {
     }
 };
 
-void test_binaryHeap_custom_less() {
-    BinaryHeap<MyStructHeap> h = BinaryHeap<MyStructHeap>(std::less<MyStructHeap>{});
+void heap_custom_less(Heap<MyStructHeap>& h) {
     // Insert 5 unsorted structs into the heap
     h.insert(MyStructHeap(10, 5));  // 35
     h.insert(MyStructHeap(0, 40));  // 40
@@ -156,4 +153,19 @@ void test_binaryHeap_custom_less() {
 
     // Verify that the heap is now empty
     assert(h.empty());
+}
+
+void test_binaryHeap_int_less() {
+    BinaryHeap<int> h = BinaryHeap<int>(std::less<int>{});
+    heap_int_less(h);
+}
+
+void test_binaryHeap_int_greater() {
+    BinaryHeap<int> h = BinaryHeap<int>(std::greater<int>{});
+    heap_int_greater(h);
+}
+
+void test_binaryHeap_custom_less() {
+    BinaryHeap<MyStructHeap> h = BinaryHeap<MyStructHeap>(std::less<MyStructHeap>{});
+    heap_custom_less(h);
 }
