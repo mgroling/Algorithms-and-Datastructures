@@ -1,3 +1,4 @@
+#include <functional>
 #include <iostream>
 
 #include "tuple"
@@ -7,36 +8,139 @@
 template <typename T>
 class DictHeap {
    public:
-    virtual void insert(T item) = 0;
+    virtual void insert(T item, int priority) = 0;
 
     virtual T extract() = 0;
 
-    virtual void changeKey(T item) = 0;
+    virtual void changeKey(T item, int new_priority) = 0;
 
     virtual int size() const = 0;
+
+    virtual bool empty() const = 0;
 };
 
 template <typename T>
+// Binary Heap that uses an array to save its elements
+// also has a hash map to efficiently support the changeKey operation (includes decreaseKey and increaseKey)
+// the supplied type must have the following methods implemented:
+// operator= (assignment), operator== (equals), and must be hashable (std::hash must be implemented for it)
 class BinaryDictHeap : public DictHeap<T> {
    public:
-    BinaryDictHeap(std::function<bool(T, T)> comparator) {
-        comp = comparator;
+    BinaryDictHeap(bool isMinHeap) {
+        if (isMinHeap) {
+            comp = std::less<int>{};
+        } else {
+            comp = std::greater<int>{};
+        }
     }
 
-    void insert(T item) override {
+    void insert(T item, int priority) override {
+        if (map.count(item)) {
+            throw std::invalid_argument("Item is already present");
+        }
+        items.push_back(item);
+        map[item] = std::tuple<int, int>{items.size() - 1, priority};
+        bubbleUp(items.size() - 1);
     }
 
     T extract() override {
+        // extracts the smallest element (if minHeap) or the greatest element (if maxHeap) (if tied, returns a random one)
+        if (empty()) {
+            throw std::out_of_range("Extract cannot be used on an empty heap");
+        }
+        T output = items[0];
+        items[0] = items[items.size() - 1];
+        map[items[0]] = std::tuple<int, int>{0, std::get<1>(map[items[0]])};
+        items.pop_back();
+        bubbleDown(0);
+        map.erase(output);
+        return output;
     }
 
-    void changeKey(T item) override {
+    void changeKey(T item, int new_priority) override {
+        if (!map.count(item)) {
+            throw std::invalid_argument("Item is not present");
+        }
+        // supports decrease and increase key
+        int index = std::get<0>(map[item]);
+        int old_priority = std::get<1>(map[item]);
+        map[item] = std::tuple<int, int>{index, new_priority};
+        if (comp(new_priority, old_priority)) {
+            // priority was decreased
+            bubbleUp(index);
+        } else {
+            // priority was increased
+            bubbleDown(index);
+        }
     }
 
     int size() const override {
+        return items.size();
+    }
+
+    bool empty() const override {
+        return !items.size();
     }
 
    private:
     std::vector<T> items;
     std::unordered_map<T, std::tuple<int, int>> map;
-    std::function<bool(T, T)> comp;
+    std::function<bool(int, int)> comp;
+
+    int getLeftChild(int index) const {
+        return (index << 1) + 1;
+    }
+
+    int getComparatorChild(int index) const {
+        // if the element does not have a child, this returns the passed index
+        int leftChildIndex = getLeftChild(index);
+        if (leftChildIndex >= items.size()) {
+            return index;
+        }
+        // if the element only has a left child, then return its index
+        if (leftChildIndex + 1 >= items.size()) {
+            return leftChildIndex;
+        }
+        // create a const reference to the hash map, because otherwise we get a non-const reference when calling get, which violates
+        // the constness of the function
+        const std::unordered_map<T, std::tuple<int, int>> &constMap = map;
+        // if the element has a left and a right child, then return the index of the one where comp(left, right) is true
+        if (comp(std::get<1>(constMap.at(items[leftChildIndex])), std::get<1>(constMap.at(items[leftChildIndex + 1])))) {
+            return leftChildIndex;
+        }
+        return leftChildIndex + 1;
+    }
+
+    int getParent(int index) const {
+        // behaviour is only correct for nodes that have a parent (1..n), index = 0 will return -1
+        return (index >> 1) - (index % 2 == 0);
+    }
+
+    void swap(const int &index1, const int &index2) {
+        T temp = items[index1];
+        items[index1] = items[index2];
+        items[index2] = temp;
+        map[items[index1]] = std::tuple<int, int>{index1, std::get<1>(map[items[index1]])};
+        map[items[index2]] = std::tuple<int, int>{index2, std::get<1>(map[items[index2]])};
+    }
+
+    void bubbleUp(int index) {
+        // the element of the given index is "bubbled" up towards the top of the heap (restoring the heap property on its path)
+        int parentIndex = getParent(index);
+        while (index != 0 && comp(std::get<1>(map[items[index]]), std::get<1>(map[items[parentIndex]]))) {
+            swap(index, parentIndex);
+            index = parentIndex;
+            parentIndex = getParent(parentIndex);
+        }
+    }
+
+    void bubbleDown(int index) {
+        // the element of the given index is "bubbled" down towards the bottom of the heap (restoring the heap property on its path)
+        int childIndex = getComparatorChild(index);
+        while (index != childIndex && comp(std::get<1>(map[items[childIndex]]), std::get<1>(map[items[index]]))) {
+            swap(index, childIndex);
+            index = childIndex;
+            childIndex = getComparatorChild(childIndex);
+        }
+    }
 };

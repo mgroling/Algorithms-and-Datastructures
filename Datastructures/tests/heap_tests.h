@@ -3,7 +3,7 @@
 
 #include "../heap.h"
 
-void test_binaryHeap_normal_operation_int_less() {
+void test_binaryHeap_int_less() {
     BinaryHeap<int> h = BinaryHeap<int>(std::less<int>{});
     // Insert 5 unsorted numbers into the heap
     h.insert(50);
@@ -56,7 +56,7 @@ void test_binaryHeap_normal_operation_int_less() {
     assert(h.empty());
 }
 
-void test_binaryHeap_normal_operation_int_greater() {
+void test_binaryHeap_int_greater() {
     BinaryHeap<int> h = BinaryHeap<int>(std::greater<int>{});
     // Insert 5 unsorted numbers into the heap
     h.insert(50);
@@ -109,24 +109,24 @@ void test_binaryHeap_normal_operation_int_greater() {
     assert(h.empty());
 }
 
-struct MyStruct {
+struct MyStructHeap {
     int x;
     int y;
 
-    MyStruct(int x, int y) {
+    MyStructHeap(int x, int y) {
         this->x = x;
         this->y = y;
     }
 
-    bool operator<(const MyStruct& other) const {
+    bool operator<(const MyStructHeap& other) const {
         return x * 3 + y < other.x * 3 + other.y;
     }
 
-    bool operator==(const MyStruct& other) const {
+    bool operator==(const MyStructHeap& other) const {
         return x == other.x & y == other.y;
     }
 
-    MyStruct& operator=(const MyStruct& other) {
+    MyStructHeap& operator=(const MyStructHeap& other) {
         if (this != &other) {
             x = other.x;
             y = other.y;
@@ -135,24 +135,24 @@ struct MyStruct {
     }
 };
 
-void test_binaryHeap_normal_operation_custom_less() {
-    BinaryHeap<MyStruct> h = BinaryHeap<MyStruct>(std::less<MyStruct>{});
+void test_binaryHeap_custom_less() {
+    BinaryHeap<MyStructHeap> h = BinaryHeap<MyStructHeap>(std::less<MyStructHeap>{});
     // Insert 5 unsorted structs into the heap
-    h.insert(MyStruct(10, 5));  // 35
-    h.insert(MyStruct(0, 40));  // 40
-    h.insert(MyStruct(4, 20));  // 32
-    h.insert(MyStruct(15, 0));  // 45
-    h.insert(MyStruct(9, 7));   // 34
+    h.insert(MyStructHeap(10, 5));  // 35
+    h.insert(MyStructHeap(0, 40));  // 40
+    h.insert(MyStructHeap(4, 20));  // 32
+    h.insert(MyStructHeap(15, 0));  // 45
+    h.insert(MyStructHeap(9, 7));   // 34
 
     // Verify that the heap now has size 5
     assert(h.size() == 5);
 
     // Extract the 5 structs from the heap
-    assert(h.extract() == MyStruct(4, 20));
-    assert(h.extract() == MyStruct(9, 7));
-    assert(h.extract() == MyStruct(10, 5));
-    assert(h.extract() == MyStruct(0, 40));
-    assert(h.extract() == MyStruct(15, 0));
+    assert(h.extract() == MyStructHeap(4, 20));
+    assert(h.extract() == MyStructHeap(9, 7));
+    assert(h.extract() == MyStructHeap(10, 5));
+    assert(h.extract() == MyStructHeap(0, 40));
+    assert(h.extract() == MyStructHeap(15, 0));
 
     // Verify that the heap is now empty
     assert(h.empty());
