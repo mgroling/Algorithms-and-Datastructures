@@ -1,3 +1,6 @@
+#ifndef dictHeap
+#define dictHeap
+
 #include <functional>
 
 #include "tuple"
@@ -7,11 +10,13 @@
 template <typename T>
 class DictHeap {
    public:
-    virtual void insert(T item, int priority) = 0;
+    virtual void insert(T item, double priority) = 0;
 
     virtual T extract() = 0;
 
-    virtual void changeKey(T item, int new_priority) = 0;
+    virtual void changeKey(T item, double new_priority) = 0;
+
+    virtual bool contains(T item) = 0;
 
     virtual int size() const = 0;
 
@@ -27,18 +32,18 @@ class BinaryDictHeap : public DictHeap<T> {
    public:
     BinaryDictHeap(bool isMinHeap) {
         if (isMinHeap) {
-            comp = std::less<int>{};
+            comp = std::less<double>{};
         } else {
-            comp = std::greater<int>{};
+            comp = std::greater<double>{};
         }
     }
 
-    void insert(T item, int priority) override {
+    void insert(T item, double priority) override {
         if (map.count(item)) {
             throw std::invalid_argument("Item is already present");
         }
         items.push_back(item);
-        map[item] = std::tuple<int, int>{items.size() - 1, priority};
+        map[item] = std::tuple<int, double>{items.size() - 1, priority};
         bubbleUp(items.size() - 1);
     }
 
@@ -49,21 +54,21 @@ class BinaryDictHeap : public DictHeap<T> {
         }
         T output = items[0];
         items[0] = items[items.size() - 1];
-        map[items[0]] = std::tuple<int, int>{0, std::get<1>(map[items[0]])};
+        map[items[0]] = std::tuple<int, double>{0, std::get<1>(map[items[0]])};
         items.pop_back();
         bubbleDown(0);
         map.erase(output);
         return output;
     }
 
-    void changeKey(T item, int new_priority) override {
+    void changeKey(T item, double new_priority) override {
         // supports decrease and increase key
         if (!map.count(item)) {
             throw std::invalid_argument("Item is not present");
         }
         int index = std::get<0>(map[item]);
-        int old_priority = std::get<1>(map[item]);
-        map[item] = std::tuple<int, int>{index, new_priority};
+        double old_priority = std::get<1>(map[item]);
+        map[item] = std::tuple<int, double>{index, new_priority};
         if (comp(new_priority, old_priority)) {
             // priority was decreased
             bubbleUp(index);
@@ -71,6 +76,10 @@ class BinaryDictHeap : public DictHeap<T> {
             // priority was increased
             bubbleDown(index);
         }
+    }
+
+    bool contains(T item) {
+        return map.count(item);
     }
 
     int size() const override {
@@ -83,8 +92,8 @@ class BinaryDictHeap : public DictHeap<T> {
 
    private:
     std::vector<T> items;
-    std::unordered_map<T, std::tuple<int, int>> map;
-    std::function<bool(int, int)> comp;
+    std::unordered_map<T, std::tuple<int, double>> map;
+    std::function<bool(double, double)> comp;
 
     int getLeftChild(int index) const {
         return (index << 1) + 1;
@@ -102,7 +111,7 @@ class BinaryDictHeap : public DictHeap<T> {
         }
         // create a const reference to the hash map, because otherwise we get a non-const reference when calling get, which violates
         // the constness of the function
-        const std::unordered_map<T, std::tuple<int, int>> &constMap = map;
+        const std::unordered_map<T, std::tuple<int, double>> &constMap = map;
         // if the element has a left and a right child, then return the index of the one where comp(left, right) is true
         if (comp(std::get<1>(constMap.at(items[leftChildIndex])), std::get<1>(constMap.at(items[leftChildIndex + 1])))) {
             return leftChildIndex;
@@ -119,8 +128,8 @@ class BinaryDictHeap : public DictHeap<T> {
         T temp = items[index1];
         items[index1] = items[index2];
         items[index2] = temp;
-        map[items[index1]] = std::tuple<int, int>{index1, std::get<1>(map[items[index1]])};
-        map[items[index2]] = std::tuple<int, int>{index2, std::get<1>(map[items[index2]])};
+        map[items[index1]] = std::tuple<int, double>{index1, std::get<1>(map[items[index1]])};
+        map[items[index2]] = std::tuple<int, double>{index2, std::get<1>(map[items[index2]])};
     }
 
     void bubbleUp(int index) {
@@ -143,3 +152,5 @@ class BinaryDictHeap : public DictHeap<T> {
         }
     }
 };
+
+#endif
