@@ -1,3 +1,8 @@
+#ifndef heap
+#define heap
+
+#include <functional>
+
 #include "vector"
 
 template <typename T>
@@ -104,3 +109,5 @@ class BinaryHeap : public Heap<T> {
         }
     }
 };
+
+#endif
