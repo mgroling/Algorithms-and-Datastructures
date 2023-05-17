@@ -3,13 +3,14 @@
 
 #include <algorithm>
 #include <functional>
+#include <limits>
 
 #include "../../Datastructures/dictHeap.h"
 #include "../../Datastructures/graph.h"
 #include "unordered_map"
 #include "vector"
 
-std::vector<int> reconstructPath(const std::unordered_map<int, int>& previous, const int& start_vertex, int end_vertex) {
+std::vector<int> reconstructPath(const std::vector<int>& previous, const int& start_vertex, int end_vertex) {
     std::vector<int> path;
 
     while (previous.at(end_vertex) != end_vertex) {
@@ -26,11 +27,11 @@ std::tuple<std::vector<int>, double> dijkstra(Graph& g, int start_vertex, int en
     // Init a priority queue
     BinaryDictHeap<int> h = BinaryDictHeap<int>(true);
     h.insert(start_vertex, 0);
-    // Init a map to store the distance to each node
-    std::unordered_map<int, double> distance;
+    // Init an a array to store the distances
+    std::vector<double> distance(g.getNumVertices(), std::numeric_limits<double>::max());
     distance[start_vertex] = 0;
-    // Init a map to store the previous nodes of each vertex to later reconstruct the path
-    std::unordered_map<int, int> previous;
+    // Init an array to store the previous nodes of each vertex to later reconstruct the path
+    std::vector<int> previous(g.getNumVertices(), -1);
     previous[start_vertex] = start_vertex;
 
     while (!h.empty()) {
@@ -47,7 +48,7 @@ std::tuple<std::vector<int>, double> dijkstra(Graph& g, int start_vertex, int en
             int v = neighbours[i];
             double alt_dist = dist_u + costs[i];
             // check if the path using u is shorter than the current distance to v
-            if (!distance.count(v) || alt_dist < distance.at(v)) {
+            if (alt_dist < distance[v]) {
                 distance[v] = alt_dist;
                 previous[v] = u;
                 if (h.contains(v)) {
