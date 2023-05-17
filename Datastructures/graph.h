@@ -7,8 +7,11 @@
 
 class Graph {
    public:
+    virtual int getNumVertices() const = 0;
     // get the indices of all vertices that are adjacent to the given vertex
     virtual std::tuple<std::vector<int>, std::vector<double>> getNeighbours(const int &vertex) const = 0;
+    // creates an edge of weight between vertex1 and vertex2
+    virtual void addEdge(const int &vertex1, const int &vertex2, const double &weight, const bool &bidirectional) = 0;
 };
 
 template <int numVertices>
@@ -18,8 +21,16 @@ class AdjacencyMatrixGraph : public Graph {
    public:
     std::array<double, numVertices * numVertices> matrix;
 
+    AdjacencyMatrixGraph() {
+        matrix = {0};
+    }
+
     AdjacencyMatrixGraph(std::array<double, numVertices * numVertices> adjacencyMatrix) {
         matrix = adjacencyMatrix;
+    }
+
+    int getNumVertices() const override {
+        return numVertices;
     }
 
     std::tuple<std::vector<int>, std::vector<double>> getNeighbours(const int &vertex) const override {
@@ -36,6 +47,19 @@ class AdjacencyMatrixGraph : public Graph {
             }
         }
         return std::tuple<std::vector<int>, std::vector<double>>{neighbours, distances};
+    }
+
+    void addEdge(const int &vertex1, const int &vertex2, const double &weight, const bool &bidirectional) override {
+        if (vertex1 < 0 || vertex2 < 0 || vertex1 >= numVertices || vertex2 >= numVertices) {
+            throw std::invalid_argument("Vertices must be >= 0 and < numVertices");
+        }
+        if (vertex1 == vertex2) {
+            throw std::invalid_argument("Vertices must not be the same");
+        }
+        matrix[vertex1 * numVertices + vertex2] = weight;
+        if (bidirectional) {
+            matrix[vertex2 * numVertices + vertex1] = weight;
+        }
     }
 };
 
