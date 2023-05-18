@@ -11,8 +11,7 @@ std::tuple<Graph*, int, int> generate_graph_startEqualsEnd() {
     return std::tuple<Graph*, int, int>{g, 0, 0};
 }
 
-void assert_path_startEqualsEnd(std::vector<int> path, double distance) {
-    assert(distance == 0);
+void assert_path_startEqualsEnd(std::vector<int> path) {
     assert(path.size() == 1);
     assert(path[0] == 0);
 }
@@ -36,8 +35,7 @@ std::tuple<Graph*, int, int> generate_graph_9vertices() {
     return std::tuple<Graph*, int, int>{g, 0, 5};
 }
 
-void assert_path_9vertices(std::vector<int> path, double distance) {
-    assert(distance == 22);
+void assert_path_9vertices(std::vector<int> path) {
     std::vector<int> correct_path = {0, 6, 7, 4, 2, 3, 5};
     assert(path.size() == correct_path.size());
     for (int i = 0; i < correct_path.size(); i++) {
@@ -46,23 +44,21 @@ void assert_path_9vertices(std::vector<int> path, double distance) {
 }
 
 void test_dijkstra_startEqualsEnd() {
-    std::vector<int> path;
-    double distance;
     Graph* g;
     int start, end;
     std::tie(g, start, end) = generate_graph_startEqualsEnd();
-    std::tie(path, distance) = dijkstra(*g, start, end);
-    assert_path_startEqualsEnd(path, distance);
+    std::vector<int> previous = dijkstra(*g, start, end);
+    std::vector<int> path = reconstructPath(previous, start, end);
+    assert_path_startEqualsEnd(path);
     delete g;
 }
 
 void test_dijkstra_9vertices() {
-    std::vector<int> path;
-    double distance;
     Graph* g;
     int start, end;
     std::tie(g, start, end) = generate_graph_9vertices();
-    std::tie(path, distance) = dijkstra(*g, start, end);
-    assert_path_9vertices(path, distance);
+    std::vector<int> previous = dijkstra(*g, start, end);
+    std::vector<int> path = reconstructPath(previous, start, end);
+    assert_path_9vertices(path);
     delete g;
 }

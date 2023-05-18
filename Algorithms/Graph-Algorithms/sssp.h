@@ -23,7 +23,7 @@ std::vector<int> reconstructPath(const std::vector<int>& previous, const int& st
     return path;
 }
 
-std::tuple<std::vector<int>, double> dijkstra(Graph& g, int start_vertex, int end_vertex) {
+std::vector<int> dijkstra(Graph& g, int start_vertex, int end_vertex = -1) {
     // Init a priority queue
     BinaryDictHeap<int> h = BinaryDictHeap<int>(true);
     h.insert(start_vertex, 0);
@@ -38,7 +38,7 @@ std::tuple<std::vector<int>, double> dijkstra(Graph& g, int start_vertex, int en
         int u = h.extract();
         double dist_u = distance[u];
         if (u == end_vertex) {
-            return std::tuple<std::vector<int>, double>{reconstructPath(previous, start_vertex, end_vertex), dist_u};
+            return previous;
         }
 
         std::vector<int> neighbours;
@@ -60,7 +60,7 @@ std::tuple<std::vector<int>, double> dijkstra(Graph& g, int start_vertex, int en
         }
     }
 
-    return std::tuple<std::vector<int>, double>{std::vector<int>{}, 0};
+    return previous;
 }
 
 #endif
