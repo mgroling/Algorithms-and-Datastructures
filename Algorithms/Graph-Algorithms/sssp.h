@@ -1,3 +1,5 @@
+// Algorithms for solving the single source single path problem (sssp)
+
 #ifndef sssp
 #define sssp
 
@@ -23,7 +25,7 @@ std::vector<int> reconstructPath(const std::vector<int>& previous, const int& st
     return path;
 }
 
-std::vector<int> dijkstra(Graph& g, int start_vertex, int end_vertex = -1) {
+std::vector<int> dijkstrasAlgorithm(Graph& g, int start_vertex, int end_vertex = -1) {
     // Init a priority queue
     BinaryDictHeap<int> h = BinaryDictHeap<int>(true);
     h.insert(start_vertex, 0);

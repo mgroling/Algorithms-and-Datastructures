@@ -47,7 +47,7 @@ void test_dijkstra_startEqualsEnd() {
     Graph* g;
     int start, end;
     std::tie(g, start, end) = generate_graph_startEqualsEnd();
-    std::vector<int> previous = dijkstra(*g, start, end);
+    std::vector<int> previous = dijkstrasAlgorithm(*g, start, end);
     std::vector<int> path = reconstructPath(previous, start, end);
     assert_path_startEqualsEnd(path);
     delete g;
@@ -57,7 +57,7 @@ void test_dijkstra_9vertices() {
     Graph* g;
     int start, end;
     std::tie(g, start, end) = generate_graph_9vertices();
-    std::vector<int> previous = dijkstra(*g, start, end);
+    std::vector<int> previous = dijkstrasAlgorithm(*g, start, end);
     std::vector<int> path = reconstructPath(previous, start, end);
     assert_path_9vertices(path);
     delete g;
