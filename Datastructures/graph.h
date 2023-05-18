@@ -8,8 +8,12 @@
 class Graph {
    public:
     virtual int getNumVertices() const = 0;
+
+    virtual double getCost(const int &vertex1, const int &vertex2) const = 0;
+
     // get the indices of all vertices that are adjacent to the given vertex
     virtual std::tuple<std::vector<int>, std::vector<double>> getNeighbours(const int &vertex) const = 0;
+
     // creates an edge of weight between vertex1 and vertex2
     virtual void addEdge(const int &vertex1, const int &vertex2, const double &weight, const bool &bidirectional) = 0;
 };
@@ -33,7 +37,17 @@ class AdjacencyMatrixGraph : public Graph {
         return numVertices;
     }
 
+    double getCost(const int &vertex1, const int &vertex2) const override {
+        if (vertex1 < 0 || vertex2 < 0 || vertex1 >= numVertices || vertex2 >= numVertices) {
+            throw std::invalid_argument("Vertices must be >= 0 and < numVertices");
+        }
+        return matrix[vertex1 * numVertices + vertex2];
+    }
+
     std::tuple<std::vector<int>, std::vector<double>> getNeighbours(const int &vertex) const override {
+        if (vertex < 0 || vertex >= numVertices) {
+            throw std::invalid_argument("Vertex must be >= 0 and < numVertices");
+        }
         std::vector<int> neighbours;
         std::vector<double> distances;
         // init pointer to the first edge of the given vertex
