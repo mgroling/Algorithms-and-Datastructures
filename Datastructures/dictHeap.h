@@ -153,4 +153,80 @@ class BinaryDictHeap : public DictHeap<T> {
     }
 };
 
+template <typename T>
+class Node {
+   public:
+    T item;
+    double priority;
+    bool marked;
+    int rank;
+    Node *left;
+    Node *right;
+    Node *child
+
+    Node(T item, double priority) {
+        this->item = item;
+        this->priority = priority;
+        this->marked = false;
+        this->rank = 0;
+        this->left = nullptr;
+        this->right = nullptr;
+        this->child = nullptr;
+    }
+};
+
+template <typename T>
+class FibonacciDictHeap : public DictHeap {
+   public:
+    FibonacciDictHeap(bool isMinHeap) {
+        min = nullptr;
+        if (isMinHeap) {
+            comp = std::less<double>{};
+        } else {
+            comp = std::greater<double>{};
+        }
+    }
+
+    void insert(T item, double priority) override {
+        Node *ptr = new Node(item, priority);
+        map[item] = ptr;
+        if (min == nullptr) {
+            min = ptr;
+            ptr->right = ptr;
+            ptr->left = ptr;
+        } else {
+            // append item to the right of the current minimum and update pointers
+            Node *right = min->right;
+            right->left = ptr;
+            min->right = ptr;
+            ptr->left = min;
+            ptr->right = right;
+            if (comp(priority, min->priority)) {
+                min = ptr;
+            }
+        }
+    }
+
+    T extract() override;
+
+    void changeKey(T item, double new_priority) override;
+
+    bool contains(T item) override {
+        return map.count(item);
+    }
+
+    int size() const override {
+        return map.size();
+    }
+
+    bool empty() const override {
+        return min == nullptr;
+    }
+
+   private:
+    Node *min;
+    std::unordered_map<T, Node *> map;
+    std::function<bool(double, double)> comp;
+};
+
 #endif
