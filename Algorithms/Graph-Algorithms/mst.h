@@ -1,5 +1,8 @@
 // Algorithms for solving the minimum spanning tree problem (mst)
 
+#ifndef mst
+#define mst
+
 #include <limits>
 
 #include "../../Datastructures/dictHeap.h"
@@ -51,3 +54,5 @@ std::vector<int> primsAlgorithm(Graph& g) {
 
     return edges;
 }
+
+#endif
