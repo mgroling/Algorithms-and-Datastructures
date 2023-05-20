@@ -39,7 +39,7 @@ class BinaryDictHeap : public DictHeap<T> {
     }
 
     void insert(T item, double priority) override {
-        if (map.count(item)) {
+        if (contains(item)) {
             throw std::invalid_argument("Item is already present");
         }
         items.push_back(item);
@@ -162,7 +162,8 @@ class Node {
     int rank;
     Node *left;
     Node *right;
-    Node *child
+    Node *child;
+    Node *parent;
 
     Node(T item, double priority) {
         this->item = item;
@@ -172,6 +173,7 @@ class Node {
         this->left = nullptr;
         this->right = nullptr;
         this->child = nullptr;
+        this->parent = nullptr;
     }
 };
 
@@ -180,6 +182,7 @@ class FibonacciDictHeap : public DictHeap {
    public:
     FibonacciDictHeap(bool isMinHeap) {
         min = nullptr;
+        max_rank = 0;
         if (isMinHeap) {
             comp = std::less<double>{};
         } else {
@@ -188,6 +191,9 @@ class FibonacciDictHeap : public DictHeap {
     }
 
     void insert(T item, double priority) override {
+        if (contains(item)) {
+            throw std::invalid_argument("Item is already present");
+        }
         Node *ptr = new Node(item, priority);
         map[item] = ptr;
         if (min == nullptr) {
@@ -195,19 +201,55 @@ class FibonacciDictHeap : public DictHeap {
             ptr->right = ptr;
             ptr->left = ptr;
         } else {
-            // append item to the right of the current minimum and update pointers
-            Node *right = min->right;
-            right->left = ptr;
-            min->right = ptr;
-            ptr->left = min;
-            ptr->right = right;
+            addToRootList(ptr);
             if (comp(priority, min->priority)) {
                 min = ptr;
             }
         }
     }
 
-    T extract() override;
+    T extract() override {
+        // extracts the smallest element (if minHeap) or the greatest element (if maxHeap) (if tied, returns a random one)
+        if (empty()) {
+            throw std::out_of_range("Extract cannot be used on an empty heap");
+        }
+        T output = min->item;
+
+        // add all children of min to the root list
+        if (min->child != nullptr) {
+            Node *next_child = min->child->right;
+            while (next_child != min->child) {
+                next_child->parent = nullptr;
+                next_child = next_child->right;
+                addToRootList(next_child->left);
+            }
+            min->child->parent = nullptr;
+            addToRootList(min->child);
+        }
+
+        // remove the old minimum
+        min->right->left = min->left;
+        min->left->right = min->right;
+        map.erase(output);
+        if (empty()) {
+            min = nullptr;
+            return output;
+        }
+        Node *temp = min->right;
+        delete min;
+        min = temp;
+
+        // find the new minimum
+        Node *cur = temp->right;
+        while (cur != temp) {
+            if (comp(cur->priority, min->priority)) {
+                min = cur;
+            }
+            cur = cur->right;
+        }
+
+        consolidate();
+    }
 
     void changeKey(T item, double new_priority) override;
 
@@ -224,9 +266,64 @@ class FibonacciDictHeap : public DictHeap {
     }
 
    private:
+    // the heap supports both min and max, but for simplicity we will refer to it as min
     Node *min;
+    int max_rank;
     std::unordered_map<T, Node *> map;
     std::function<bool(double, double)> comp;
+
+    void consolidate() {
+        std::vector<Node *> rank_array(max_rank, nullptr);
+
+        rank_array[min->rank] = min;
+        Node *cur_node = min->right;
+        while (cur_node != min) {
+            if (rank_array[cur_node->rank] != nullptr) {
+                Node *other_node = rank_array[cur_node->rank];
+                rank_array[cur_node->rank] = nullptr;
+                if (comp(cur_node->priority, other_node->priority)) {
+                    merge(cur_node, other_node);
+                    rank_array[cur_node->rank] = cur_node;
+                } else {
+                    merge(other_node, cur_node);
+                    rank_array[other_node->rank] = other_node;
+                    cur_node = other_node;
+                }
+            } else {
+                rank_array[cur_node->rank] = cur_node;
+                cur_node = cur_node->right;
+            }
+        }
+    }
+
+    void merge(Node *node1, Node *node2) {
+        // it is assumed that comp(node1->priority, node2->priority) is true
+        // remove node 2 from the root list
+        node2->left->right = node2->right;
+        node2->right->left = node2->left;
+        // add node2 as a child to node1
+        if (node1->child == nullptr) {
+            node1->child = node2;
+            node2->right = node2;
+            node2->left = node2;
+        } else {
+            // add node 2 to the right of the child
+            node2->left = node1->child;
+            node2->right = node1->child->right;
+            node1->child->right->left = node2;
+            node1->child->right = node2;
+        }
+        node2->parent = node1;
+        node1->rank++;
+    }
+
+    void addToRootList(Node *node) {
+        // assumes that the root list has at least 1 element
+        min->right->left = node;
+        min->left->right = node;
+        node->left = min;
+        node->right = min->right;
+    }
 };
 
 #endif
