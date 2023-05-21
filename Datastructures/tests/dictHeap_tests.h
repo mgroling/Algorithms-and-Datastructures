@@ -4,10 +4,10 @@
 
 void dictHeap_int_less(DictHeap<int>& h) {
     // Insert 5 unsorted numbers into the heap
-    h.insert(50, 15);
+    h.insert(50, 65);
     h.insert(10, 10);
     h.insert(30, 80);
-    h.insert(90, 40);
+    h.insert(90, 140);
     h.insert(20, 20);
 
     // Change some keys
@@ -45,7 +45,7 @@ void dictHeap_int_less(DictHeap<int>& h) {
 
     // Insert 3 more unsorted numbers into the heap
     h.insert(80, 80);
-    h.insert(70, 70);
+    h.insert(70, 300);
     h.insert(100, 100);
 
     // Change priorities of keys to other values
@@ -67,11 +67,11 @@ void dictHeap_int_less(DictHeap<int>& h) {
 
 void dictHeap_int_greater(DictHeap<int>& h) {
     // Insert 5 unsorted numbers into the heap
-    h.insert(50, 200);
+    h.insert(50, 2);
     h.insert(10, 10);
     h.insert(30, 0);
     h.insert(90, 90);
-    h.insert(20, 0);
+    h.insert(20, 15);
 
     // Verify that the heap now has size 5
     assert(h.size() == 5);
@@ -113,16 +113,19 @@ void dictHeap_int_greater(DictHeap<int>& h) {
 
     // Change priorities of keys to other values
     h.changeKey(70, 200);
-    h.changeKey(100, 0);
+    h.changeKey(100, 150);
 
     // Verify that the heap now has size 4
     assert(h.size() == 4);
 
+    // 10, 10
+    // 80, 80
+
     // Extract the next 3 numbers from the heap
     assert(h.extract() == 70);
+    assert(h.extract() == 100);
     assert(h.extract() == 80);
     assert(h.extract() == 10);
-    assert(h.extract() == 100);
 
     // Verify that the heap is now empty
     assert(h.empty());
@@ -131,6 +134,9 @@ void dictHeap_int_greater(DictHeap<int>& h) {
 struct MyStructDictHeap {
     int x;
     int y;
+
+    MyStructDictHeap() {
+    }
 
     MyStructDictHeap(int x, int y) {
         this->x = x;
@@ -176,15 +182,35 @@ void dictHeap_custom_less(DictHeap<MyStructDictHeap>& h) {
     assert(h.extract() == MyStructDictHeap(4, 20));
     assert(h.extract() == MyStructDictHeap(9, 7));
 
-    // Increase one key and decrease another
+    // Decrease two keys
     h.changeKey(MyStructDictHeap(15, 0), 30);
-    h.changeKey(MyStructDictHeap(10, 5), 50);
+    h.changeKey(MyStructDictHeap(10, 5), 0);
 
+    assert(h.extract() == MyStructDictHeap(10, 5));
     assert(h.extract() == MyStructDictHeap(15, 0));
     assert(h.extract() == MyStructDictHeap(0, 40));
-    assert(h.extract() == MyStructDictHeap(10, 5));
 
     // Verify that the heap is now empty
+    assert(h.empty());
+}
+
+void dictHeap_int_less_increaseKey(DictHeap<int>& h) {
+    h.insert(10, 0);
+    h.insert(5, 5);
+    h.insert(15, 15);
+    h.insert(20, 20);
+    h.insert(0, 0);
+
+    h.changeKey(10, 10);
+    h.changeKey(5, 30);
+    h.changeKey(0, 25);
+
+    assert(h.extract() == 10);
+    assert(h.extract() == 15);
+    assert(h.extract() == 20);
+    assert(h.extract() == 0);
+    assert(h.extract() == 5);
+
     assert(h.empty());
 }
 
@@ -200,5 +226,25 @@ void test_binaryDictHeap_int_greater() {
 
 void test_binaryDictHeap_custom_less() {
     BinaryDictHeap<MyStructDictHeap> h = BinaryDictHeap<MyStructDictHeap>(true);
+    dictHeap_custom_less(h);
+}
+
+void test_binaryHeap_int_less_increaseKey() {
+    BinaryDictHeap<int> h = BinaryDictHeap<int>(true);
+    dictHeap_int_less_increaseKey(h);
+}
+
+void test_fibonacciDictHeap_int_less() {
+    FibonacciDictHeap<int> h = FibonacciDictHeap<int>(true);
+    dictHeap_int_less(h);
+}
+
+void test_fibonacciDictHeap_int_greater() {
+    FibonacciDictHeap<int> h = FibonacciDictHeap<int>(false);
+    dictHeap_int_greater(h);
+}
+
+void test_fibonacciDictHeap_custom_less() {
+    FibonacciDictHeap<MyStructDictHeap> h = FibonacciDictHeap<MyStructDictHeap>(true);
     dictHeap_custom_less(h);
 }

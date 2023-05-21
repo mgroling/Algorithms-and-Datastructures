@@ -1,6 +1,7 @@
 #ifndef dictHeap
 #define dictHeap
 
+#include <cmath>
 #include <functional>
 
 #include "tuple"
@@ -160,10 +161,10 @@ class Node {
     double priority;
     bool marked;
     int rank;
-    Node *left;
-    Node *right;
-    Node *child;
-    Node *parent;
+    Node<T> *left;
+    Node<T> *right;
+    Node<T> *child;
+    Node<T> *parent;
 
     Node(T item, double priority) {
         this->item = item;
@@ -178,11 +179,10 @@ class Node {
 };
 
 template <typename T>
-class FibonacciDictHeap : public DictHeap {
+class FibonacciDictHeap : public DictHeap<T> {
    public:
     FibonacciDictHeap(bool isMinHeap) {
         min = nullptr;
-        max_rank = 0;
         if (isMinHeap) {
             comp = std::less<double>{};
         } else {
@@ -194,7 +194,7 @@ class FibonacciDictHeap : public DictHeap {
         if (contains(item)) {
             throw std::invalid_argument("Item is already present");
         }
-        Node *ptr = new Node(item, priority);
+        Node<T> *ptr = new Node<T>(item, priority);
         map[item] = ptr;
         if (min == nullptr) {
             min = ptr;
@@ -217,7 +217,7 @@ class FibonacciDictHeap : public DictHeap {
 
         // add all children of min to the root list
         if (min->child != nullptr) {
-            Node *next_child = min->child->right;
+            Node<T> *next_child = min->child->right;
             while (next_child != min->child) {
                 next_child->parent = nullptr;
                 next_child = next_child->right;
@@ -235,23 +235,46 @@ class FibonacciDictHeap : public DictHeap {
             min = nullptr;
             return output;
         }
-        Node *temp = min->right;
+        Node<T> *temp = min->right;
         delete min;
         min = temp;
 
-        // find the new minimum
-        Node *cur = temp->right;
-        while (cur != temp) {
-            if (comp(cur->priority, min->priority)) {
-                min = cur;
+        if (size()) {
+            // find the new minimum
+            Node<T> *cur = temp->right;
+            while (cur != temp) {
+                if (comp(cur->priority, min->priority)) {
+                    min = cur;
+                }
+                cur = cur->right;
             }
-            cur = cur->right;
+            consolidate();
+        } else {
+            min = nullptr;
         }
-
-        consolidate();
+        return output;
     }
 
-    void changeKey(T item, double new_priority) override;
+    void changeKey(T item, double new_priority) override {
+        // only supports decrease key
+        if (!map.count(item)) {
+            throw std::invalid_argument("Item is not present");
+        }
+        Node<T> *node = map[item];
+        if (comp(node->priority, new_priority)) {
+            throw std::invalid_argument("Priority must not be greater than before (in case of min heap, for max heap its vice versa)");
+        }
+        node->priority = new_priority;
+        // if the heap property is violated cut the tree rooted at node, meld it into the root list, and unmark it
+        // propagate to parent
+        if (node->parent != nullptr && comp(new_priority, node->parent->priority)) {
+            rebaseNode(node);
+        }
+        // check if item is new min
+        if (comp(new_priority, min->priority)) {
+            min = node;
+        }
+    }
 
     bool contains(T item) override {
         return map.count(item);
@@ -267,26 +290,23 @@ class FibonacciDictHeap : public DictHeap {
 
    private:
     // the heap supports both min and max, but for simplicity we will refer to it as min
-    Node *min;
-    int max_rank;
-    std::unordered_map<T, Node *> map;
+    Node<T> *min;
+    std::unordered_map<T, Node<T> *> map;
     std::function<bool(double, double)> comp;
 
     void consolidate() {
-        std::vector<Node *> rank_array(max_rank, nullptr);
+        int size_v = int(std::log(size() + 1) / std::log(1.618)) + 1;
+        std::vector<Node<T> *> rank_array(size_v, nullptr);
 
-        rank_array[min->rank] = min;
-        Node *cur_node = min->right;
-        while (cur_node != min) {
+        Node<T> *cur_node = min;
+        while (cur_node != min->left || rank_array[cur_node->rank] != nullptr) {
             if (rank_array[cur_node->rank] != nullptr) {
-                Node *other_node = rank_array[cur_node->rank];
+                Node<T> *other_node = rank_array[cur_node->rank];
                 rank_array[cur_node->rank] = nullptr;
                 if (comp(cur_node->priority, other_node->priority)) {
                     merge(cur_node, other_node);
-                    rank_array[cur_node->rank] = cur_node;
                 } else {
                     merge(other_node, cur_node);
-                    rank_array[other_node->rank] = other_node;
                     cur_node = other_node;
                 }
             } else {
@@ -296,8 +316,8 @@ class FibonacciDictHeap : public DictHeap {
         }
     }
 
-    void merge(Node *node1, Node *node2) {
-        // it is assumed that comp(node1->priority, node2->priority) is true
+    void merge(Node<T> *node1, Node<T> *node2) {
+        // it is assumed that comp(node1->priority, node2->priority) is true and they are both part of the root list
         // remove node 2 from the root list
         node2->left->right = node2->right;
         node2->right->left = node2->left;
@@ -317,12 +337,49 @@ class FibonacciDictHeap : public DictHeap {
         node1->rank++;
     }
 
-    void addToRootList(Node *node) {
+    void addToRootList(Node<T> *node) {
         // assumes that the root list has at least 1 element
+        Node<T> *right = min->right;
         min->right->left = node;
-        min->left->right = node;
+        min->right = node;
         node->left = min;
-        node->right = min->right;
+        node->right = right;
+    }
+
+    void removeFromInnerTree(Node<T> *node) {
+        // removes a node from the inner tree (removin the pointers from its siblings and parent to it)
+        // remove the node from its siblings
+        node->left->right = node->right;
+        node->right->left = node->left;
+
+        // remove the node from its parent
+        // check if it is the direct child
+        if (node->parent->child == node) {
+            // check if it is the only child
+            if (node->parent->child->right == node) {
+                node->parent->child = nullptr;
+            } else {
+                node->parent->child = node->right;
+            }
+        }
+    }
+
+    void rebaseNode(Node<T> *node) {
+        Node<T> *parent = node->parent;
+        if (parent == nullptr) {
+            return;
+        }
+        removeFromInnerTree(node);
+        addToRootList(node);
+        node->marked = false;
+        node->parent = nullptr;
+
+        // mark its parent, if its not marked yet, otherwise remove it as well
+        if (parent->marked) {
+            rebaseNode(node->parent);
+        } else {
+            node->parent->marked = true;
+        }
     }
 };
 
