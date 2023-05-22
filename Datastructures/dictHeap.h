@@ -300,7 +300,7 @@ class FibonacciDictHeap : public DictHeap<T> {
 
         Node<T> *cur_node = min;
         while (cur_node != min->left || rank_array[cur_node->rank] != nullptr) {
-            if (rank_array[cur_node->rank] != nullptr) {
+            if (rank_array[cur_node->rank] != nullptr && rank_array[cur_node->rank] != cur_node) {
                 Node<T> *other_node = rank_array[cur_node->rank];
                 rank_array[cur_node->rank] = nullptr;
                 if (comp(cur_node->priority, other_node->priority)) {

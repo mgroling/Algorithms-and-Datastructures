@@ -2,8 +2,22 @@
 
 #include "../../../Datastructures/graph.h"
 #include "../mst.h"
-#include "tuple"
 #include "vector"
+
+Graph* generate_graph_8vertices() {
+    AdjacencyMatrixGraph<8>* g = new AdjacencyMatrixGraph<8>();
+    g->addEdge(0, 1, 6, true);
+    g->addEdge(0, 2, 2, true);
+    g->addEdge(1, 2, 3, true);
+    g->addEdge(1, 3, 3, true);
+    g->addEdge(1, 6, 2, true);
+    g->addEdge(2, 5, 3, true);
+    g->addEdge(2, 6, 9, true);
+    g->addEdge(3, 7, 8, true);
+    g->addEdge(4, 7, 7, true);
+    g->addEdge(6, 7, 8, true);
+    return g;
+}
 
 Graph* generate_graph_18vertices() {
     AdjacencyMatrixGraph<18>* g = new AdjacencyMatrixGraph<18>();
@@ -58,7 +72,14 @@ void assert_mst(Graph& g, std::vector<int> mstEdges, double actual_cost) {
     }
 }
 
-void test_prim_17vertices() {
+void test_prim_8vertices() {
+    Graph* g = generate_graph_8vertices();
+    std::vector<int> mstEdges = primsAlgorithm(*g);
+    assert_mst(*g, mstEdges, 28);
+    delete g;
+}
+
+void test_prim_18vertices() {
     Graph* g = generate_graph_18vertices();
     std::vector<int> mstEdges = primsAlgorithm(*g);
     assert_mst(*g, mstEdges, 52);
