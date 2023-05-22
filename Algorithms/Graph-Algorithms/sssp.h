@@ -27,7 +27,7 @@ std::vector<int> reconstructPath(const std::vector<int>& previous, const int& st
 
 std::vector<int> dijkstrasAlgorithm(Graph& g, int start_vertex, int end_vertex = -1) {
     // Init a priority queue
-    BinaryDictHeap<int> h = BinaryDictHeap<int>(true);
+    FibonacciDictHeap<int> h = FibonacciDictHeap<int>(true);
     h.insert(start_vertex, 0);
     // Init an a array to store the distances
     std::vector<double> distance(g.getNumVertices(), std::numeric_limits<double>::max());

@@ -11,7 +11,7 @@
 
 std::vector<int> primsAlgorithm(Graph& g) {
     // Init a priority queue and add a random vertex to it
-    BinaryDictHeap<int> h = BinaryDictHeap<int>(true);
+    FibonacciDictHeap<int> h = FibonacciDictHeap<int>(true);
     h.insert(0, 0);
     // Init an array to keep track of which vertices are already part of our tree
     std::vector<bool> mstVertices(g.getNumVertices(), false);
