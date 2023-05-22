@@ -378,7 +378,7 @@ class FibonacciDictHeap : public DictHeap<T> {
         if (parent->marked) {
             rebaseNode(node->parent);
         } else {
-            node->parent->marked = true;
+            parent->marked = true;
         }
     }
 };
