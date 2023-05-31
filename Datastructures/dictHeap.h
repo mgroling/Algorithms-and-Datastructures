@@ -298,15 +298,15 @@ class FibonacciDictHeap : public DictHeap<T> {
         int size_v = int(std::log(size() + 1) / std::log(1.618)) + 1;
         std::vector<Node<T> *> rank_array(size_v, nullptr);
 
-        Node<T> *cur_node = min;
-        while (cur_node != min->left || rank_array[cur_node->rank] != nullptr) {
-            if (rank_array[cur_node->rank] != nullptr && rank_array[cur_node->rank] != cur_node) {
+        Node<T> *cur_node = min->right;
+        while (cur_node != min || rank_array[cur_node->rank] != nullptr) {
+            if (rank_array[cur_node->rank] != nullptr) {
                 Node<T> *other_node = rank_array[cur_node->rank];
                 rank_array[cur_node->rank] = nullptr;
                 if (comp(cur_node->priority, other_node->priority)) {
-                    merge(cur_node, other_node);
+                    merge(cur_node, other_node, false);
                 } else {
-                    merge(other_node, cur_node);
+                    merge(other_node, cur_node, true);
                     cur_node = other_node;
                 }
             } else {
@@ -316,11 +316,23 @@ class FibonacciDictHeap : public DictHeap<T> {
         }
     }
 
-    void merge(Node<T> *node1, Node<T> *node2) {
+    void merge(Node<T> *node1, Node<T> *node2, bool swap) {
         // it is assumed that comp(node1->priority, node2->priority) is true and they are both part of the root list
-        // remove node 2 from the root list
-        node2->left->right = node2->right;
-        node2->right->left = node2->left;
+        // if swap, then remove node 1 from root list and add it at the position of node2
+        if (swap) {
+            // remove node1 from its original position
+            node1->left->right = node1->right;
+            node1->right->left = node1->left;
+            // add node1 at the position of node2
+            node2->left->right = node1;
+            node2->right->left = node1;
+            node1->left = node2->left;
+            node1->right = node2->right;
+        } else {
+            // remove node 2 from the root list
+            node2->left->right = node2->right;
+            node2->right->left = node2->left;
+        }
         // add node2 as a child to node1
         if (node1->child == nullptr) {
             node1->child = node2;
@@ -347,7 +359,7 @@ class FibonacciDictHeap : public DictHeap<T> {
     }
 
     void removeFromInnerTree(Node<T> *node) {
-        // removes a node from the inner tree (removin the pointers from its siblings and parent to it)
+        // removes a node from the inner tree (removing the pointers from its siblings and parent to it)
         // remove the node from its siblings
         node->left->right = node->right;
         node->right->left = node->left;
@@ -376,7 +388,7 @@ class FibonacciDictHeap : public DictHeap<T> {
 
         // mark its parent, if its not marked yet, otherwise remove it as well
         if (parent->marked) {
-            rebaseNode(node->parent);
+            rebaseNode(parent);
         } else {
             parent->marked = true;
         }
