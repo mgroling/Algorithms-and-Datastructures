@@ -1,1 +1,2 @@
-main*
+# Ignore all main files
+*main
