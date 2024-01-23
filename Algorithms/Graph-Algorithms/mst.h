@@ -9,7 +9,8 @@
 #include "../../Datastructures/graph.h"
 #include "vector"
 
-std::vector<int> primsAlgorithm(Graph& g) {
+std::vector<int> primsAlgorithm(Graph &g)
+{
     // Init a priority queue and add a random vertex to it
     FibonacciDictHeap<int> h = FibonacciDictHeap<int>(true);
     h.insert(0, 0);
@@ -24,12 +25,14 @@ std::vector<int> primsAlgorithm(Graph& g) {
     std::vector<int> edges;
     edges.reserve((g.getNumVertices() - 1) << 1);
 
-    while (!h.empty()) {
+    while (!h.empty())
+    {
         int u = h.extract();
         // add u to the current mst
         mstVertices[u] = true;
         // add the edge connecting u to the current mst to the edge set
-        if (u) {
+        if (u)
+        {
             edges.push_back(u);
             edges.push_back(connector[u]);
         }
@@ -37,15 +40,21 @@ std::vector<int> primsAlgorithm(Graph& g) {
         std::vector<int> neighbours;
         std::vector<double> costs;
         std::tie(neighbours, costs) = g.getNeighbours(u);
-        for (int j = 0; j < neighbours.size(); j++) {
+        for (int j = 0; j < neighbours.size(); j++)
+        {
             int v = neighbours[j];
-            // check if neighbour is already in current mst and if no, check if the connection over that edge is better than the current connection
-            if (!mstVertices[v] && costs[j] < distance[v]) {
+            // check if neighbour is already in current mst and if no, check if the connection over that edge is better
+            // than the current connection
+            if (!mstVertices[v] && costs[j] < distance[v])
+            {
                 distance[v] = costs[j];
                 connector[v] = u;
-                if (h.contains(v)) {
+                if (h.contains(v))
+                {
                     h.changeKey(v, costs[j]);
-                } else {
+                }
+                else
+                {
                     h.insert(v, costs[j]);
                 }
             }

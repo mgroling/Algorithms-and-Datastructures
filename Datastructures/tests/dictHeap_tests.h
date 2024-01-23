@@ -4,7 +4,8 @@
 #include "../dictHeap.h"
 #include "array"
 
-void dictHeap_int_less(DictHeap<int>& h) {
+void dictHeap_int_less(DictHeap<int> &h)
+{
     // Insert 5 unsorted numbers into the heap
     h.insert(50, 65);
     h.insert(10, 10);
@@ -67,7 +68,8 @@ void dictHeap_int_less(DictHeap<int>& h) {
     assert(h.empty());
 }
 
-void dictHeap_int_greater(DictHeap<int>& h) {
+void dictHeap_int_greater(DictHeap<int> &h)
+{
     // Insert 5 unsorted numbers into the heap
     h.insert(50, 2);
     h.insert(10, 10);
@@ -133,24 +135,30 @@ void dictHeap_int_greater(DictHeap<int>& h) {
     assert(h.empty());
 }
 
-struct MyStructDictHeap {
+struct MyStructDictHeap
+{
     int x;
     int y;
 
-    MyStructDictHeap() {
+    MyStructDictHeap()
+    {
     }
 
-    MyStructDictHeap(int x, int y) {
+    MyStructDictHeap(int x, int y)
+    {
         this->x = x;
         this->y = y;
     }
 
-    bool operator==(const MyStructDictHeap& other) const {
+    bool operator==(const MyStructDictHeap &other) const
+    {
         return x == other.x & y == other.y;
     }
 
-    MyStructDictHeap& operator=(const MyStructDictHeap& other) {
-        if (this != &other) {
+    MyStructDictHeap &operator=(const MyStructDictHeap &other)
+    {
+        if (this != &other)
+        {
             x = other.x;
             y = other.y;
         }
@@ -158,18 +166,21 @@ struct MyStructDictHeap {
     }
 };
 
-namespace std {
+namespace std
+{
 
-template <>
-struct hash<MyStructDictHeap> {
-    std::size_t operator()(const MyStructDictHeap& s) const noexcept {
+template <> struct hash<MyStructDictHeap>
+{
+    std::size_t operator()(const MyStructDictHeap &s) const noexcept
+    {
         return std::hash<int>()(s.x) ^ std::hash<int>()(s.y);
     }
 };
 
-}  // namespace std
+} // namespace std
 
-void dictHeap_custom_less(DictHeap<MyStructDictHeap>& h) {
+void dictHeap_custom_less(DictHeap<MyStructDictHeap> &h)
+{
     // Insert 5 unsorted structs into the heap
     h.insert(MyStructDictHeap(10, 5), 35);
     h.insert(MyStructDictHeap(0, 40), 40);
@@ -196,7 +207,8 @@ void dictHeap_custom_less(DictHeap<MyStructDictHeap>& h) {
     assert(h.empty());
 }
 
-void dictHeap_int_less_increaseKey(DictHeap<int>& h) {
+void dictHeap_int_less_increaseKey(DictHeap<int> &h)
+{
     h.insert(10, 0);
     h.insert(5, 5);
     h.insert(15, 15);
@@ -216,30 +228,29 @@ void dictHeap_int_less_increaseKey(DictHeap<int>& h) {
     assert(h.empty());
 }
 
-void dictHeap_int_less_many(DictHeap<int>& h) {
-    std::array<int, 105> numbers = {57, 23, 81, 96, 102, 4, 68, 35, 92, 7, 10, 29, 62, 17, 52, 86,
-                                    103, 42, 75, 14, 61, 39, 55, 31, 3, 94, 72, 50, 76, 1, 87, 45,
-                                    98, 9, 70, 59, 30, 12, 19, 83, 38, 48, 28, 93, 101, 69, 41, 85,
-                                    66, 22, 99, 32, 79, 8, 97, 18, 26, 91, 104, 43, 15, 64, 24, 73,
-                                    47, 2, 80, 11, 37, 78, 13, 67, 20, 105, 54, 88, 6, 89, 21, 58,
-                                    84, 27, 95, 46, 16, 90, 56, 33, 71, 49, 77, 34, 63, 25, 74,
-                                    5, 40, 82, 36, 60, 51, 65, 44, 100, 53};
+void dictHeap_int_less_many(DictHeap<int> &h)
+{
+    std::array<int, 105> numbers = {
+        57, 23, 81, 96, 102, 4,  68, 35, 92, 7,  10, 29, 62, 17, 52, 86, 103, 42,  75, 14,  61, 39, 55,  31, 3,  94, 72,
+        50, 76, 1,  87, 45,  98, 9,  70, 59, 30, 12, 19, 83, 38, 48, 28, 93,  101, 69, 41,  85, 66, 22,  99, 32, 79, 8,
+        97, 18, 26, 91, 104, 43, 15, 64, 24, 73, 47, 2,  80, 11, 37, 78, 13,  67,  20, 105, 54, 88, 6,   89, 21, 58, 84,
+        27, 95, 46, 16, 90,  56, 33, 71, 49, 77, 34, 63, 25, 74, 5,  40, 82,  36,  60, 51,  65, 44, 100, 53};
 
     std::array<int, 6> first_to_remove = {23, 4, 1, 3, 2, 5};
-    std::array<int, 99> remaining = {57, 81, 96, 102, 68, 35, 92, 7, 10, 29, 62, 17, 52, 86,
-                                     103, 42, 75, 14, 61, 39, 55, 31, 94, 72, 50, 76, 87, 45,
-                                     98, 9, 70, 59, 30, 12, 19, 83, 38, 48, 28, 93, 101, 69, 41, 85,
-                                     66, 22, 99, 32, 79, 8, 97, 18, 26, 91, 104, 43, 15, 64, 24, 73,
-                                     47, 80, 11, 37, 78, 13, 67, 20, 105, 54, 88, 6, 89, 21, 58,
-                                     84, 27, 95, 46, 16, 90, 56, 33, 71, 49, 77, 34, 63, 25, 74,
-                                     40, 82, 36, 60, 51, 65, 44, 100, 53};
+    std::array<int, 99> remaining = {
+        57, 81, 96, 102, 68,  35, 92, 7,  10, 29, 62, 17, 52, 86, 103, 42,  75, 14, 61,  39, 55, 31, 94,  72, 50,
+        76, 87, 45, 98,  9,   70, 59, 30, 12, 19, 83, 38, 48, 28, 93,  101, 69, 41, 85,  66, 22, 99, 32,  79, 8,
+        97, 18, 26, 91,  104, 43, 15, 64, 24, 73, 47, 80, 11, 37, 78,  13,  67, 20, 105, 54, 88, 6,  89,  21, 58,
+        84, 27, 95, 46,  16,  90, 56, 33, 71, 49, 77, 34, 63, 25, 74,  40,  82, 36, 60,  51, 65, 44, 100, 53};
     std::sort(std::begin(remaining), std::end(remaining));
 
     // insert 5 numbers, then extract 1, then add 10, then extract 1, ...
     int cur_index = 0;
-    for (int i = 1; i < 7; i++) {
+    for (int i = 1; i < 7; i++)
+    {
         // insert numbers
-        for (int j = 0; j < i * 5; j++) {
+        for (int j = 0; j < i * 5; j++)
+        {
             h.insert(numbers[cur_index], numbers[cur_index]);
             cur_index++;
         }
@@ -247,52 +258,62 @@ void dictHeap_int_less_many(DictHeap<int>& h) {
         assert(h.extract() == first_to_remove[i - 1]);
     }
 
-    for (int i = 0; i < 99; i++) {
+    for (int i = 0; i < 99; i++)
+    {
         assert(h.extract() == remaining[i]);
     }
 }
 
-void test_binaryDictHeap_int_less() {
+void test_binaryDictHeap_int_less()
+{
     BinaryDictHeap<int> h = BinaryDictHeap<int>(true);
     dictHeap_int_less(h);
 }
 
-void test_binaryDictHeap_int_greater() {
+void test_binaryDictHeap_int_greater()
+{
     BinaryDictHeap<int> h = BinaryDictHeap<int>(false);
     dictHeap_int_greater(h);
 }
 
-void test_binaryDictHeap_custom_less() {
+void test_binaryDictHeap_custom_less()
+{
     BinaryDictHeap<MyStructDictHeap> h = BinaryDictHeap<MyStructDictHeap>(true);
     dictHeap_custom_less(h);
 }
 
-void test_binaryHeap_int_less_increaseKey() {
+void test_binaryHeap_int_less_increaseKey()
+{
     BinaryDictHeap<int> h = BinaryDictHeap<int>(true);
     dictHeap_int_less_increaseKey(h);
 }
 
-void test_binaryHeap_int_less_many() {
+void test_binaryHeap_int_less_many()
+{
     BinaryDictHeap<int> h = BinaryDictHeap<int>(true);
     dictHeap_int_less_many(h);
 }
 
-void test_fibonacciDictHeap_int_less() {
+void test_fibonacciDictHeap_int_less()
+{
     FibonacciDictHeap<int> h = FibonacciDictHeap<int>(true);
     dictHeap_int_less(h);
 }
 
-void test_fibonacciDictHeap_int_greater() {
+void test_fibonacciDictHeap_int_greater()
+{
     FibonacciDictHeap<int> h = FibonacciDictHeap<int>(false);
     dictHeap_int_greater(h);
 }
 
-void test_fibonacciDictHeap_custom_less() {
+void test_fibonacciDictHeap_custom_less()
+{
     FibonacciDictHeap<MyStructDictHeap> h = FibonacciDictHeap<MyStructDictHeap>(true);
     dictHeap_custom_less(h);
 }
 
-void test_fibonacciDictHeap_int_many() {
+void test_fibonacciDictHeap_int_many()
+{
     FibonacciDictHeap<int> h = FibonacciDictHeap<int>(true);
     dictHeap_int_less_many(h);
 }

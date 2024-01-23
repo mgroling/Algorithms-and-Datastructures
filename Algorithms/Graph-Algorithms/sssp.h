@@ -12,10 +12,12 @@
 #include "unordered_map"
 #include "vector"
 
-std::vector<int> reconstructPath(const std::vector<int>& previous, const int& start_vertex, int end_vertex) {
+std::vector<int> reconstructPath(const std::vector<int> &previous, const int &start_vertex, int end_vertex)
+{
     std::vector<int> path;
 
-    while (previous.at(end_vertex) != end_vertex) {
+    while (previous.at(end_vertex) != end_vertex)
+    {
         path.push_back(end_vertex);
         end_vertex = previous.at(end_vertex);
     }
@@ -25,7 +27,8 @@ std::vector<int> reconstructPath(const std::vector<int>& previous, const int& st
     return path;
 }
 
-std::vector<int> dijkstrasAlgorithm(Graph& g, int start_vertex, int end_vertex = -1) {
+std::vector<int> dijkstrasAlgorithm(Graph &g, int start_vertex, int end_vertex = -1)
+{
     // Init a priority queue
     FibonacciDictHeap<int> h = FibonacciDictHeap<int>(true);
     h.insert(start_vertex, 0);
@@ -36,26 +39,33 @@ std::vector<int> dijkstrasAlgorithm(Graph& g, int start_vertex, int end_vertex =
     std::vector<int> previous(g.getNumVertices(), -1);
     previous[start_vertex] = start_vertex;
 
-    while (!h.empty()) {
+    while (!h.empty())
+    {
         int u = h.extract();
         double dist_u = distance[u];
-        if (u == end_vertex) {
+        if (u == end_vertex)
+        {
             return previous;
         }
 
         std::vector<int> neighbours;
         std::vector<double> costs;
         std::tie(neighbours, costs) = g.getNeighbours(u);
-        for (int i = 0; i < neighbours.size(); i++) {
+        for (int i = 0; i < neighbours.size(); i++)
+        {
             int v = neighbours[i];
             double alt_dist = dist_u + costs[i];
             // check if the path using u is shorter than the current distance to v
-            if (alt_dist < distance[v]) {
+            if (alt_dist < distance[v])
+            {
                 distance[v] = alt_dist;
                 previous[v] = u;
-                if (h.contains(v)) {
+                if (h.contains(v))
+                {
                     h.changeKey(v, alt_dist);
-                } else {
+                }
+                else
+                {
                     h.insert(v, alt_dist);
                 }
             }

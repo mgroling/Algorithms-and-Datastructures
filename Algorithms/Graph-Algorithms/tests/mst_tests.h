@@ -4,8 +4,9 @@
 #include "../mst.h"
 #include "vector"
 
-Graph* generate_graph_8vertices() {
-    AdjacencyMatrixGraph<8>* g = new AdjacencyMatrixGraph<8>();
+Graph *generate_graph_8vertices()
+{
+    AdjacencyMatrixGraph<8> *g = new AdjacencyMatrixGraph<8>();
     g->addEdge(0, 1, 6, true);
     g->addEdge(0, 2, 2, true);
     g->addEdge(1, 2, 3, true);
@@ -19,8 +20,9 @@ Graph* generate_graph_8vertices() {
     return g;
 }
 
-Graph* generate_graph_18vertices() {
-    AdjacencyMatrixGraph<18>* g = new AdjacencyMatrixGraph<18>();
+Graph *generate_graph_18vertices()
+{
+    AdjacencyMatrixGraph<18> *g = new AdjacencyMatrixGraph<18>();
     g->addEdge(0, 1, 7, true);
     g->addEdge(0, 14, 8, true);
     g->addEdge(1, 4, 1, true);
@@ -56,10 +58,12 @@ Graph* generate_graph_18vertices() {
     return g;
 }
 
-void assert_mst(Graph& g, std::vector<int> mstEdges, double actual_cost) {
+void assert_mst(Graph &g, std::vector<int> mstEdges, double actual_cost)
+{
     double cost = 0;
     std::vector<bool> mstVertices(g.getNumVertices(), false);
-    for (int i = 0; i < mstEdges.size(); i += 2) {
+    for (int i = 0; i < mstEdges.size(); i += 2)
+    {
         cost += g.getCost(mstEdges[i], mstEdges[i + 1]);
         mstVertices[mstEdges[i]] = true;
         mstVertices[mstEdges[i + 1]] = true;
@@ -67,20 +71,23 @@ void assert_mst(Graph& g, std::vector<int> mstEdges, double actual_cost) {
     // check that cost of mst equals the actual cost
     assert(cost == actual_cost);
     // check that all vertices of the graph are part of the mst
-    for (int i = 0; i < mstVertices.size(); i++) {
+    for (int i = 0; i < mstVertices.size(); i++)
+    {
         assert(mstVertices[i]);
     }
 }
 
-void test_prim_8vertices() {
-    Graph* g = generate_graph_8vertices();
+void test_prim_8vertices()
+{
+    Graph *g = generate_graph_8vertices();
     std::vector<int> mstEdges = primsAlgorithm(*g);
     assert_mst(*g, mstEdges, 28);
     delete g;
 }
 
-void test_prim_18vertices() {
-    Graph* g = generate_graph_18vertices();
+void test_prim_18vertices()
+{
+    Graph *g = generate_graph_18vertices();
     std::vector<int> mstEdges = primsAlgorithm(*g);
     assert_mst(*g, mstEdges, 52);
     delete g;

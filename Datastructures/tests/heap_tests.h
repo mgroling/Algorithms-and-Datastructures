@@ -3,7 +3,8 @@
 
 #include "../heap.h"
 
-void heap_int_less(Heap<int>& h) {
+void heap_int_less(Heap<int> &h)
+{
     // Insert 5 unsorted numbers into the heap
     h.insert(50);
     h.insert(10);
@@ -55,7 +56,8 @@ void heap_int_less(Heap<int>& h) {
     assert(h.empty());
 }
 
-void heap_int_greater(Heap<int>& h) {
+void heap_int_greater(Heap<int> &h)
+{
     // Insert 5 unsorted numbers into the heap
     h.insert(50);
     h.insert(10);
@@ -107,25 +109,31 @@ void heap_int_greater(Heap<int>& h) {
     assert(h.empty());
 }
 
-struct MyStructHeap {
+struct MyStructHeap
+{
     int x;
     int y;
 
-    MyStructHeap(int x, int y) {
+    MyStructHeap(int x, int y)
+    {
         this->x = x;
         this->y = y;
     }
 
-    bool operator<(const MyStructHeap& other) const {
+    bool operator<(const MyStructHeap &other) const
+    {
         return x * 3 + y < other.x * 3 + other.y;
     }
 
-    bool operator==(const MyStructHeap& other) const {
+    bool operator==(const MyStructHeap &other) const
+    {
         return x == other.x & y == other.y;
     }
 
-    MyStructHeap& operator=(const MyStructHeap& other) {
-        if (this != &other) {
+    MyStructHeap &operator=(const MyStructHeap &other)
+    {
+        if (this != &other)
+        {
             x = other.x;
             y = other.y;
         }
@@ -133,13 +141,14 @@ struct MyStructHeap {
     }
 };
 
-void heap_custom_less(Heap<MyStructHeap>& h) {
+void heap_custom_less(Heap<MyStructHeap> &h)
+{
     // Insert 5 unsorted structs into the heap
-    h.insert(MyStructHeap(10, 5));  // 35
-    h.insert(MyStructHeap(0, 40));  // 40
-    h.insert(MyStructHeap(4, 20));  // 32
-    h.insert(MyStructHeap(15, 0));  // 45
-    h.insert(MyStructHeap(9, 7));   // 34
+    h.insert(MyStructHeap(10, 5)); // 35
+    h.insert(MyStructHeap(0, 40)); // 40
+    h.insert(MyStructHeap(4, 20)); // 32
+    h.insert(MyStructHeap(15, 0)); // 45
+    h.insert(MyStructHeap(9, 7));  // 34
 
     // Verify that the heap now has size 5
     assert(h.size() == 5);
@@ -155,17 +164,20 @@ void heap_custom_less(Heap<MyStructHeap>& h) {
     assert(h.empty());
 }
 
-void test_binaryHeap_int_less() {
+void test_binaryHeap_int_less()
+{
     BinaryHeap<int> h = BinaryHeap<int>(std::less<int>{});
     heap_int_less(h);
 }
 
-void test_binaryHeap_int_greater() {
+void test_binaryHeap_int_greater()
+{
     BinaryHeap<int> h = BinaryHeap<int>(std::greater<int>{});
     heap_int_greater(h);
 }
 
-void test_binaryHeap_custom_less() {
+void test_binaryHeap_custom_less()
+{
     BinaryHeap<MyStructHeap> h = BinaryHeap<MyStructHeap>(std::less<MyStructHeap>{});
     heap_custom_less(h);
 }
