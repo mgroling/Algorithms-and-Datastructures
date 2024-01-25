@@ -39,7 +39,28 @@ Sample Output 1:
 
 ----------------------------------------------------- SOLUTION -----------------------------------------------------
 
+The solution is a greedy solution and the problem can be split into two parts:
 
+Sub-problem: We don't have any 10-crown coins:
+
+Then, we can just build as many 5-3-crown pairs as possible (inserting a
+5-crown coin and three 1-crown coins). If we have any 5-crown coins left after that, we can swap 3-crown coins out of
+the existing pairings as much as possible. For all cokes that we don't have any 5-crown coins for, we can just use eight
+1-crown coins.
+
+Problem:
+
+We want to spend our 10-crown coins, so we can get to the easier sub-problem as fast as possible. How could we spend
+10-crown coins? Either:
+(1) one 10-crown coin + 3 1-crown coins => one coke + one 5-crown coin
+(2) one 10-crown coin => one coke + two 1-crown coins
+
+It can be seen that it only makes sense to do (1) if we can use the 5-crown coin that we got from the exchange for a
+5-3-crown pair (and don't create a 5-5-pair that way). So we do that if we have enough 1-crown coins and it makes sense
+(like explained before). Otherwise, we just do (2). One could think that it might make sense to do a 5-5-crown swap here
+if we don't have enough 1-crown coins to do (1) otherwise. However, this increases the amount of required coins. (we use
+an extra 5-crown coin to get one). It should be obvious that making 5-3-crown swaps and eight 1-crown coin swaps here
+doesn't change anything and we can leave these swaps for later.
 
 */
 
