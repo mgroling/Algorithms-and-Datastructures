@@ -39,42 +39,75 @@ Sample Output 1:
 
 ----------------------------------------------------- SOLUTION -----------------------------------------------------
 
-First notice, that it is always better to spend crowns of higher value first (we first want to spend all coins of 10
-crowns, then of 5, and then of 1). Also notice, that we can just buy all of them at once and ignore that we get change.
-For each test case, we can compute the value of the cokes that we want to buy (i.e. we want 12 cokes, so they cost 96
-Swedish crowns). As such for the example of 96 crowns, we could pay it with 10 10-crown pieces. However, we might not
-have 10 10-crown pieces, but we use all that we have. Let's say we only have 3. As such, 7 are missing. For these 7, we
-can use 7 * 2 = 14 5-crown coins instead (however notice that we might need one less 5-crown piece in some cases). But
-again, we might not have that many 5-crown coins. This goes on until we have the values for all 3 coin types. Then we
-can just sum them up and get the result.
+
 
 */
 
 #include "kattisio.h"
 
+#include <cassert>
 #include <cmath>
 #include <vector>
 
-int solve_test_case(const Test_case &test_case)
+int solve_test_case_only_1_5_coins(Test_case &test_case)
 {
-    int value_cokes = test_case.num_cokes_to_buy * 8;
-    int coins_10_required = std::ceil(value_cokes / 10.0);
+    assert(test_case.num_10_coins == 0);
 
-    int coins_10_unavailable = std::max(coins_10_required - test_case.num_10_coins, 0);
-    int coins_10_used = coins_10_required - coins_10_unavailable;
-    int coins_5_required = coins_10_unavailable * 2 - (value_cokes % 10 <= 5 && value_cokes % 10 != 0);
-    int coins_5_unavailable = std::max(coins_5_required - test_case.num_5_coins, 0);
-    int coins_5_used = coins_5_required - coins_5_unavailable;
-    int coins_1_used = std::max(value_cokes - coins_10_used * 10 - coins_5_used * 5, 0);
+    if (test_case.num_5_coins > 2 * test_case.num_cokes_to_buy)
+    {
+        return 2 * test_case.num_cokes_to_buy;
+    }
+    int num_5_5_pairs = std::max(test_case.num_5_coins - test_case.num_cokes_to_buy, 0);
+    int num_5_3_pairs = test_case.num_5_coins - 2 * num_5_5_pairs;
+    int num_8_coins = test_case.num_cokes_to_buy - num_5_5_pairs - num_5_3_pairs;
 
-    return coins_10_used + coins_5_used + coins_1_used;
+    return num_5_5_pairs * 2 + num_5_3_pairs * 4 + num_8_coins * 8;
 }
 
-std::vector<int> solve_problem(const std::vector<Test_case> &test_cases)
+int solve_test_case(Test_case &test_case)
+{
+    int coins_10_required = test_case.num_cokes_to_buy;
+
+    if (coins_10_required <= test_case.num_10_coins)
+    {
+        return coins_10_required;
+    }
+
+    int coins_10_unavailable = std::max(coins_10_required - test_case.num_10_coins, 0);
+    int coins_5_required = coins_10_unavailable;
+    int coins_5_unavailable = coins_5_required - test_case.num_5_coins;
+
+    int num_coins_used = 0;
+    // TODO: could do this without a loop, but it works and I don't want to spend time on it right now, so...
+    while (test_case.num_10_coins > 0)
+    {
+        // there is still a need for 5-crown coins and we have sufficient resources
+        // => trade 1 10-crown coin + 3 1-crown coins for a coke and a 5-crown coin
+        if (coins_5_unavailable > 0 && test_case.num_1_coins >= 3)
+        {
+            test_case.num_10_coins--;
+            test_case.num_5_coins++;
+            coins_5_unavailable--;
+            test_case.num_1_coins -= 3;
+            num_coins_used += 4;
+        }
+        else
+        {
+            test_case.num_10_coins--;
+            test_case.num_1_coins += 2;
+            num_coins_used++;
+        }
+        test_case.num_cokes_to_buy--;
+    }
+
+    return num_coins_used + solve_test_case_only_1_5_coins(test_case);
+}
+
+std::vector<int> solve_problem(std::vector<Test_case> &test_cases)
 {
     std::vector<int> output;
 
-    for (const Test_case &test_case : test_cases)
+    for (Test_case &test_case : test_cases)
     {
         output.emplace_back(solve_test_case(test_case));
     }

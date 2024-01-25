@@ -30,3 +30,22 @@ void test_3()
     double solution = solve_problem(transactions);
     assert(std::abs(output - solution) < 0.01);
 }
+
+void test_4()
+{
+    std::vector<std::string> input;
+    input.emplace_back("buy 1000000 1225184279");
+    for (int i = 0; i < 10000; i++)
+    {
+        input.emplace_back("split 497");
+        input.emplace_back("merge 497");
+        input.emplace_back("buy 72931234 1225184279");
+        input.emplace_back("sell 72931234 1");
+    }
+    input.emplace_back("die 1500000000");
+
+    double output = 1000000 * (1500000000 - (1500000000 - 1225184279) * 0.3);
+    std::vector<Transaction> transactions = parse_input(input);
+    double solution = solve_problem(transactions);
+    assert(std::abs(output - solution) < 0.01);
+}
