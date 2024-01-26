@@ -1,17 +1,14 @@
 #include "kattisio.h"
 #include "solution.h"
 
+#include <iomanip>
+#include <limits>
+
 int main()
 {
-    // std::vector<Transaction> transactions = parse_input(read_input());
-    // double solution = solve_problem(transactions);
-    // std::cout << solution << "\n";
-
-    std::vector<std::string> input{"buy 1000 1000", "buy 999 999", "split 497", "merge 727", "die 1000"};
-    double output = 1998001;
-    std::vector<Transaction> transactions = parse_input(input);
-    double solution = solve_problem(transactions);
-    std::cout << solution << "\n";
+    std::vector<Transaction> transactions = parse_input(read_input());
+    long double solution = solve_problem(transactions);
+    std::cout << std::setprecision(std::numeric_limits<long double>::max_digits10) << solution << "\n";
 
     return 0;
 }
