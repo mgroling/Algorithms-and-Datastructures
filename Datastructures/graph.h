@@ -1,16 +1,17 @@
 #ifndef graph
 #define graph
 
-#include "array"
-#include "tuple"
-#include "vector"
+#include <array>
+#include <stdexcept>
+#include <tuple>
+#include <vector>
 
 class Graph
 {
   public:
     virtual int getNumVertices() const = 0;
 
-    virtual double getCost(const int &vertex1, const int &vertex2) const = 0;
+    // virtual double getCost(const int &vertex1, const int &vertex2) const = 0;
 
     // get the indices of all vertices that are adjacent to the given vertex
     virtual std::tuple<std::vector<int>, std::vector<double>> getNeighbours(const int &vertex) const = 0;
@@ -43,14 +44,14 @@ class AdjacencyMatrixGraph : public Graph
         return numVertices;
     }
 
-    double getCost(const int &vertex1, const int &vertex2) const override
-    {
-        if (vertex1 < 0 || vertex2 < 0 || vertex1 >= numVertices || vertex2 >= numVertices)
-        {
-            throw std::invalid_argument("Vertices must be >= 0 and < numVertices");
-        }
-        return matrix[vertex1 * numVertices + vertex2];
-    }
+    // double getCost(const int &vertex1, const int &vertex2) const override
+    // {
+    //     if (vertex1 < 0 || vertex2 < 0 || vertex1 >= numVertices || vertex2 >= numVertices)
+    //     {
+    //         throw std::invalid_argument("Vertices must be >= 0 and < numVertices");
+    //     }
+    //     return matrix[vertex1 * numVertices + vertex2];
+    // }
 
     std::tuple<std::vector<int>, std::vector<double>> getNeighbours(const int &vertex) const override
     {
@@ -81,14 +82,55 @@ class AdjacencyMatrixGraph : public Graph
         {
             throw std::invalid_argument("Vertices must be >= 0 and < numVertices");
         }
-        if (vertex1 == vertex2)
-        {
-            throw std::invalid_argument("Vertices must not be the same");
-        }
         matrix[vertex1 * numVertices + vertex2] = weight;
         if (bidirectional)
         {
             matrix[vertex2 * numVertices + vertex1] = weight;
+        }
+    }
+};
+
+class AdjacencyListGraph : public Graph
+{
+  public:
+    std::vector<std::tuple<std::vector<int>, std::vector<double>>> adjacencylist;
+
+    AdjacencyListGraph(int numVertices)
+    {
+        adjacencylist.resize(numVertices);
+    }
+
+    int getNumVertices() const override
+    {
+        return adjacencylist.size();
+    }
+
+    std::tuple<std::vector<int>, std::vector<double>> getNeighbours(const int &vertex) const override
+    {
+        if (vertex < 0 || vertex >= adjacencylist.size())
+        {
+            throw std::invalid_argument("Vertex must be >= 0 and < numVertices");
+        }
+        return adjacencylist[vertex];
+    }
+
+    void addEdge(const int &vertex1, const int &vertex2, const double &weight, const bool &bidirectional) override
+    {
+        // assumes that the edge didn't exist before
+        if (vertex1 < 0 || vertex2 < 0 || vertex1 >= adjacencylist.size() || vertex2 >= adjacencylist.size())
+        {
+            throw std::invalid_argument("Vertices must be >= 0 and < numVertices");
+        }
+        if (vertex1 == vertex2)
+        {
+            throw std::invalid_argument("Vertices must not be the same");
+        }
+        std::get<0>(adjacencylist[vertex1]).push_back(vertex2);
+        std::get<1>(adjacencylist[vertex1]).push_back(weight);
+        if (bidirectional)
+        {
+            std::get<0>(adjacencylist[vertex2]).push_back(vertex1);
+            std::get<1>(adjacencylist[vertex2]).push_back(weight);
         }
     }
 };

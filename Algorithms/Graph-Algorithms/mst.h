@@ -4,10 +4,10 @@
 #define mst
 
 #include <limits>
+#include <vector>
 
 #include "../../Datastructures/dictHeap.h"
 #include "../../Datastructures/graph.h"
-#include "vector"
 
 std::vector<int> primsAlgorithm(Graph &g)
 {
