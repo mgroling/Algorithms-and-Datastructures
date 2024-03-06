@@ -3,7 +3,6 @@
 
 int main()
 {
-    std::vector<std::string> input{"6 7", "1 3", "1 4", "3 2", "4 2", "5 6", "6 5", "3 4"};
     std::pair<int, std::vector<std::pair<int, int>>> test_case = parse_input(read_input());
     std::string solution = solve_problem(test_case);
     std::cout << solution << "\n";
