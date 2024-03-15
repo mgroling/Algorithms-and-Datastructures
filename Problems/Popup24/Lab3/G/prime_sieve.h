@@ -1,6 +1,9 @@
 // Authors: Marc Gröling
 // small reminder: num << 1 === num * 2, num >> 1 === num / 2
 
+#ifndef prime_sieve
+#define prime_sieve
+
 #include <cmath>
 #include <vector>
 
@@ -10,6 +13,7 @@
 class Prime_Sieve
 {
   public:
+    // uses Erathostenes' sieve for construction
     Prime_Sieve(const int &max_num)
     {
         if (max_num <= 0)
@@ -30,7 +34,7 @@ class Prime_Sieve
         {
             if (prime_vector[index])
             {
-                int candidate_times_two = candidate * 2;
+                int candidate_times_two = candidate << 1;
                 // can start at candidate squared, since numbers before will be checked by previous outer loop iteration
                 int candidate_multiplied = candidate * candidate;
                 int index_c = number_to_index(candidate_multiplied);
@@ -101,3 +105,5 @@ class Prime_Sieve
         return ((prime_index - 1) >> 1) - 1;
     }
 };
+
+#endif
