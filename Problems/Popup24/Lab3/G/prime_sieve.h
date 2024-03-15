@@ -12,36 +12,51 @@ class Prime_Sieve
   public:
     Prime_Sieve(const int &max_num)
     {
+        if (max_num <= 0)
+        {
+            throw std::invalid_argument("Invalid argument in Prime_Sieve constructor: Argument " +
+                                        std::to_string(max_num) + " must be > 0.");
+        }
+
+        max_number = max_num;
         int size_vector = (max_num >> 1) - (max_num % 2 == 0);
         prime_vector = std::vector<bool>(size_vector, true);
-        num_primes = 1;
         int sqrt_max = std::ceil(std::sqrt(max_num));
 
         // only need to loop to sqrt(max_num), since C = A * B (one of A or B must be <= sqrt(C))
-        for (int i = 0; i < sqrt_max; i++)
+        int candidate = 3;
+        int index = 0;
+        while (candidate <= sqrt_max)
         {
-            int candidate = indexToPrime(i);
-            if (prime_vector[i])
+            if (prime_vector[index])
             {
                 int candidate_times_two = candidate * 2;
-                // can only consider the cases of candidate multiplied by an odd number
-                for (int j = candidate_times_two + candidate; j <= max_num; j += candidate_times_two)
+                // can start at candidate squared, since numbers before will be checked by previous outer loop iteration
+                int candidate_multiplied = candidate * candidate;
+                int index_c = number_to_index(candidate_multiplied);
+
+                while (candidate_multiplied <= max_num)
                 {
-                    prime_vector[primeToIndex(j)] = false;
+                    prime_vector[index_c] = false;
+                    // can only consider candidate multiplied by an odd number
+                    candidate_multiplied += candidate_times_two;
+                    index_c += candidate;
                 }
             }
-        }
-
-        for (int i = 0; i < size_vector; i++)
-        {
-            num_primes += prime_vector[i];
+            // go through odd numbers
+            candidate += 2;
+            index++;
         }
     }
 
-    // returns whether or not a number is prime
-    // assumes 1 <= num <= max_num
-    bool is_prime(int num)
+    // returns whether or not a number in [1, max_num] is prime
+    bool is_prime(const int &num)
     {
+        if (num < 1 || num > max_number)
+        {
+            throw std::invalid_argument("Invalid argument in Prime_Sieve.is_prime: Argument " + std::to_string(num) +
+                                        " is outside of the allowed range [1, " + std::to_string(max_number) + "].");
+        }
         if (num == 2)
         {
             return true;
@@ -50,26 +65,38 @@ class Prime_Sieve
         {
             return false;
         }
-        return prime_vector[primeToIndex(num)];
+        return prime_vector[number_to_index(num)];
     }
 
-    // returns the number of primes in {1, 2, 3, ..., max_num}
+    // returns the number of primes in [1, max_num]
     int get_num_primes()
     {
+        if (max_number == 1)
+        {
+            return 0;
+        }
+
+        int num_primes = 1;
+
+        for (int i = 0; i < prime_vector.size(); i++)
+        {
+            num_primes += prime_vector[i];
+        }
+
         return num_primes;
     }
 
   private:
     // only stores for odd numbers starting at 3
     std::vector<bool> prime_vector;
-    int num_primes;
+    int max_number;
 
-    int indexToPrime(const int &index)
+    int index_to_number(const int &index)
     {
         return ((index + 1) << 1) + 1;
     }
 
-    int primeToIndex(const int &prime_index)
+    int number_to_index(const int &prime_index)
     {
         return ((prime_index - 1) >> 1) - 1;
     }
