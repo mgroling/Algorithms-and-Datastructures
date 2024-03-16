@@ -44,7 +44,7 @@ std::vector<std::string> read_input()
     return output;
 }
 
-std::pair<int, std::vector<int>> parse_input(std::vector<std::string> input)
+std::pair<int, std::vector<int>> parse_input(const std::vector<std::string> &input)
 {
     std::vector<std::string> split_string = split(input[0], ' ');
     int max_value = std::stoi(split_string[0]);
@@ -58,7 +58,7 @@ std::pair<int, std::vector<int>> parse_input(std::vector<std::string> input)
     return {max_value, queries};
 }
 
-std::string format_output(std::pair<int, std::vector<bool>> solution)
+std::string format_output(const std::pair<int, std::vector<bool>> &solution)
 {
     std::string output = std::to_string(solution.first) + "\n";
 

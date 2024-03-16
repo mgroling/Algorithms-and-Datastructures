@@ -1,6 +1,6 @@
 // Authors: Marc Gröling
 
-#include "prime_sieve.h"
+#include "../prime_sieve.h"
 
 #include <vector>
 

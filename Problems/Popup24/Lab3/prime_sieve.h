@@ -5,6 +5,7 @@
 #define prime_sieve
 
 #include <cmath>
+#include <stdexcept>
 #include <vector>
 
 // Datastructure that can answer if a number is prime in O(1) time
@@ -65,7 +66,7 @@ class Prime_Sieve
         {
             return true;
         }
-        if (num == 1 || (num != 2 && num % 2 == 0))
+        if (num == 1 || num % 2 == 0)
         {
             return false;
         }
