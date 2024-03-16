@@ -2,8 +2,8 @@
 // Methods for general use: kmp_search (algorithm for substring search)
 // Helper methods: build_kmp_table
 
-#ifndef substring_search
-#define substring_search
+#ifndef substring_search_h
+#define substring_search_h
 
 #include <string>
 #include <vector>
@@ -43,7 +43,7 @@ std::vector<int> build_kmp_table(const std::string &word)
 
 // finds all occurences of word in text and returns the index of them (where occurences start)
 // uses the Knuth–Morris–Pratt algorithm internally with O(|text| + |word|) time complexity
-std::vector<int> kmp_search(const std::string &text, const std::string &word)
+std::vector<int> substring_search(const std::string &text, const std::string &word)
 {
     std::vector<int> word_positions;
 

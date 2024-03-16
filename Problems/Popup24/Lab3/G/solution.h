@@ -4,7 +4,7 @@
 
 #include <vector>
 
-std::pair<int, std::vector<bool>> solve_problem(const std::pair<int, std::vector<int>> input)
+std::pair<int, std::vector<bool>> solve_problem(const std::pair<int, std::vector<int>> &input)
 {
     Prime_Sieve ps = Prime_Sieve(input.first);
     std::vector<bool> query_answers;
