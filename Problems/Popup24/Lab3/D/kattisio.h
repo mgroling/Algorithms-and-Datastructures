@@ -14,7 +14,7 @@ struct Test_case
     std::string operator_;
     unsigned long long modulus;
 
-    Test_case(unsigned long long num1, unsigned long long num2, std::string operator_, unsigned long long modulo)
+    Test_case(unsigned long long num1, unsigned long long num2, std::string operator_, unsigned long long modulus)
     {
         this->num1 = num1;
         this->num2 = num2;
@@ -76,18 +76,26 @@ std::vector<Test_case> parse_input(const std::vector<std::string> &input)
             test_cases.emplace_back(std::stoull(split_string[0]), std::stoull(split_string[2]), split_string[1],
                                     modulus);
         }
+        i += num_tests;
     }
 
     return test_cases;
 }
 
-std::string format_output(const std::vector<unsigned long long> &solution)
+std::string format_output(const std::vector<std::pair<bool, unsigned long long>> &solution)
 {
     std::string output = "";
 
-    for (const unsigned long long &answer : solution)
+    for (const std::pair<bool, unsigned long long> &answer : solution)
     {
-        output += std::to_string(answer) + '\n';
+        if (answer.first)
+        {
+            output += std::to_string(answer.second) + '\n';
+        }
+        else
+        {
+            output += "-1\n";
+        }
     }
 
     return output;
