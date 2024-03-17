@@ -89,6 +89,7 @@ template <typename T> std::pair<bool, T> modulo_divide(const T &num1, const T &n
 // (1) x % n1 = a1 % n1
 // (2) x % n2 = a2 % n2
 // returns (x, modulus), such that 0 <= x < modulus
+// assumes that n1 and n2 are coprime
 template <typename T> std::pair<T, T> chinese_remainder_coprime(const T &a1, const T &a2, const T &n1, const T &n2)
 {
     // using chinese remainder formula
