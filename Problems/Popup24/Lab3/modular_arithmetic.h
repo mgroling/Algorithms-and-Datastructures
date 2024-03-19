@@ -1,4 +1,5 @@
 // Authors: Marc Gröling
+// all functions assume that the inputs are 0 <= num < modulus
 
 #ifndef modular_arithmetic
 #define modular_arithmetic
@@ -28,7 +29,7 @@ template <typename T> T modulo_multiply(T num1, T num2, const T &modulus)
     // keeps the msb of the result of num1 * num2 % modulus (with the below line)
     T c = x * num2 / modulus;
     // first multiplication keeps the lsb of the result and the second the msb of the result (I think, not sure tbh)
-    T r = (long long)(num1 * num2 - c * modulus) % modulus;
+    T r = (num1 * num2 - c * modulus) % modulus;
     return r < 0 ? r + modulus : r;
 }
 
