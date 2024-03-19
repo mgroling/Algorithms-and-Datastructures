@@ -5,9 +5,9 @@
 
 #include <vector>
 
-std::vector<std::pair<bool, unsigned long long>> solve_problem(const std::vector<Test_case> &input)
+std::vector<std::pair<bool, long long>> solve_problem(const std::vector<Test_case> &input)
 {
-    std::vector<std::pair<bool, unsigned long long>> output;
+    std::vector<std::pair<bool, long long>> output;
 
     for (const Test_case &test_case : input)
     {

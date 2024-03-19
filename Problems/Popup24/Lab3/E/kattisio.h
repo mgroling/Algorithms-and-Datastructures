@@ -9,12 +9,12 @@
 
 struct Test_case
 {
-    unsigned long long a;
-    unsigned long long n;
-    unsigned long long b;
-    unsigned long long m;
+    long long a;
+    long long n;
+    long long b;
+    long long m;
 
-    Test_case(unsigned long long a, unsigned long long n, unsigned long long b, unsigned long long m)
+    Test_case(long long a, long long n, long long b, long long m)
     {
         this->a = a;
         this->n = n;
@@ -67,18 +67,18 @@ std::vector<Test_case> parse_input(const std::vector<std::string> &input)
     for (int i = 0; i < input.size(); i++)
     {
         split_string = split(input[i], ' ');
-        test_cases.emplace_back(std::stoull(split_string[0]), std::stoull(split_string[1]),
-                                std::stoull(split_string[2]), std::stoull(split_string[3]));
+        test_cases.emplace_back(std::stoll(split_string[0]), std::stoll(split_string[1]), std::stoll(split_string[2]),
+                                std::stoll(split_string[3]));
     }
 
     return test_cases;
 }
 
-std::string format_output(const std::vector<std::pair<unsigned long long, unsigned long long>> &solution)
+std::string format_output(const std::vector<std::pair<long long, long long>> &solution)
 {
     std::string output = "";
 
-    for (const std::pair<unsigned long long, unsigned long long> &answer : solution)
+    for (const std::pair<long long, long long> &answer : solution)
     {
         output += std::to_string(answer.first) + ' ' + std::to_string(answer.second) + '\n';
     }

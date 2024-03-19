@@ -6,7 +6,7 @@
 int main()
 {
     std::vector<Test_case> problem = parse_input(read_input());
-    std::vector<std::pair<bool, unsigned long long>> solution = solve_problem(problem);
+    std::vector<std::pair<bool, long long>> solution = solve_problem(problem);
     std::cout << format_output(solution);
 
     return 0;
