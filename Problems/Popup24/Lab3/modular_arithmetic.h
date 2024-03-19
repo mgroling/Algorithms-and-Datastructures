@@ -96,10 +96,11 @@ template <typename T> std::pair<bool, T> modulo_divide(const T &num1, const T &n
     return {false, 0};
 }
 
-// computes the solution of x that fulfills:
+// computes the solution (if it exists) of x that fulfills:
 // (1) x % n1 = a1 % n1
 // (2) x % n2 = a2 % n2
-// returns (x, modulus), such that 0 <= x < modulus (modulus = lcm(n1, n2))
+// returns (bool, x, modulus), bool tells if there is a solution
+// if there is a solution, then 0 <= x < modulus (modulus = lcm(n1, n2))
 template <typename T> std::tuple<bool, T, T> chinese_remainder(const T &a1, const T &a2, const T &n1, const T &n2)
 {
     static_assert(std::is_signed<T>::value, "T must be a signed integer type");
@@ -115,17 +116,15 @@ template <typename T> std::tuple<bool, T, T> chinese_remainder(const T &a1, cons
 
     if (gcd == 1)
     {
-        // inverses exist since gcd(n1, n2) = 1
-        T b1 = modulo_inverse(n1, n2).second;
-        T b2 = modulo_inverse(n2, n1).second;
-        T part1 = modulo_multiply(modulo_multiply(a1, b2, modulus), n2, modulus);
-        T part2 = modulo_multiply(modulo_multiply(a2, b1, modulus), n1, modulus);
-        // x = a1 * b2 * n2 + a2 * b1 * n1
+        // x = a1 * v * n2 + a2 * u * n1
         // is a solution because:
-        // b2 * n2 = 1 (mod n1) (since b2 is the inverse of n2 under n1) => a1 * b2 * n2 = a1 (mod n1)
-        // and a2 * b1 * n1 = 0 (mod n1) (since n1 is a factor)
+        // x (mod n1) = a1 * v * n2 + a2 * u * n1 = a1 * (1 - u * n1) + a2 * u * n1
+        // = a1 + (a2 - a1) * u * n1 (of which the second part is = 0, since n1 is a factor)
         // => x = a (mod n1), analogous for x = a2 (mod n2)
-        return {true, modulo_add(part1, part2, modulus), modulus};
+        return {true,
+                modulo_add(modulo_multiply(modulo_multiply(a1, v, modulus), n2, modulus),
+                           modulo_multiply(modulo_multiply(a2, u, modulus), n1, modulus), modulus),
+                modulus};
     }
 
     // a2 - a1 is not divisible by gcd => x doesn't exist
