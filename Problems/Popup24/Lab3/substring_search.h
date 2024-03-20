@@ -1,11 +1,14 @@
 // Authors: Marc Gröling
-// Methods for general use: kmp_search (algorithm for substring search)
-// Helper methods: build_kmp_table
+// Methods for general use: substring_search (algorithm for substring search, one for one pattern and one for multiple
+// patterns, functions are overloaded)
+// Helper methods: build_kmp_table, build_aho_corasick_trie (with TrieNode)
 
 #ifndef substring_search_h
 #define substring_search_h
 
+#include <queue>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 // builds the table for kmp backtracking
@@ -67,13 +70,105 @@ std::vector<int> substring_search(const std::string &text, const std::string &wo
         }
         else
         {
-            // character mismatch between word and text, check how far we need to go back using the kmp table
+            // letter mismatch between word and text, check how far we need to go back using the kmp table
             word_pos = kmp_table[word_pos];
             if (word_pos == -1)
             {
                 word_pos++;
                 text_pos++;
             }
+        }
+    }
+
+    return word_positions;
+}
+
+class TrieNode
+{
+  public:
+    std::unordered_map<char, TrieNode *> children;
+    TrieNode *suffix_link;
+    std::vector<int> words;
+};
+
+TrieNode *build_aho_corasick_trie(const std::vector<std::string> &words)
+{
+    TrieNode *root = new TrieNode();
+
+    // construct the trie with the normal down edges for all given words
+    for (int i = 0; i < words.size(); i++)
+    {
+        TrieNode *current = root;
+        for (int j = 0; j < words[i].size(); j++)
+        {
+            char letter = words[i][j];
+            // child with letter doesn't exist
+            if (current->children.find(letter) == current->children.end())
+            {
+                current->children[letter] = new TrieNode();
+            }
+            current = current->children[letter];
+        }
+        // this node portrays a word of the dictionary
+        current->words.push_back(i);
+    }
+
+    // build suffix links (in case of failure) to the longest strict suffix of all nodes
+    std::queue<TrieNode *> nodes;
+    for (const std::pair<char, TrieNode *> child : root->children)
+    {
+        nodes.push(child.second);
+        child.second->suffix_link = root;
+    }
+
+    while (!nodes.empty())
+    {
+        TrieNode *current = nodes.front();
+        nodes.pop();
+
+        for (const std::pair<char, TrieNode *> child : current->children)
+        {
+            TrieNode *suffix_link = current->suffix_link;
+            while (suffix_link != NULL && suffix_link->children.find(child.first) == suffix_link->children.end())
+            {
+                suffix_link = suffix_link->suffix_link;
+            }
+            suffix_link = suffix_link == NULL ? root : suffix_link->children[child.first];
+            child.second->suffix_link = suffix_link;
+            // add all words that are suffixes to this node for the substring search later
+            child.second->words.insert(child.second->words.begin(), suffix_link->words.begin(),
+                                       suffix_link->words.end());
+            nodes.push(child.second);
+        }
+    }
+
+    return root;
+}
+
+std::vector<std::vector<int>> substring_search(const std::string &text, const std::vector<std::string> &words)
+{
+    TrieNode *root = build_aho_corasick_trie(words);
+    TrieNode *current = root;
+    std::vector<std::vector<int>> word_positions(words.size(), std::vector<int>{});
+
+    for (int i = 0; i < text.size(); i++)
+    {
+        // iterate suffix links until a node is found that has the current character as child
+        while (current != NULL && current->children.find(text[i]) == current->children.end())
+        {
+            current = current->suffix_link;
+        }
+        if (current == NULL)
+        {
+            current = root;
+            continue;
+        }
+
+        current = current->children[text[i]];
+        // add all words of that node
+        for (const int &word : current->words)
+        {
+            word_positions[word].push_back(i - words[word].size() + 1);
         }
     }
 
