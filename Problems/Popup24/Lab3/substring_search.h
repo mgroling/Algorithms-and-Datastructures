@@ -145,6 +145,16 @@ TrieNode *build_aho_corasick_trie(const std::vector<std::string> &words)
     return root;
 }
 
+void delete_trie(TrieNode *root)
+{
+    for (const std::pair<char, TrieNode *> &child : root->children)
+    {
+        delete_trie(child.second);
+    }
+    delete root;
+}
+
+// returns the array of occurences for each word (it starts at that index)
 std::vector<std::vector<int>> substring_search(const std::string &text, const std::vector<std::string> &words)
 {
     TrieNode *root = build_aho_corasick_trie(words);
@@ -171,6 +181,8 @@ std::vector<std::vector<int>> substring_search(const std::string &text, const st
             word_positions[word].push_back(i - words[word].size() + 1);
         }
     }
+    // make sure to delete all nodes of the trie (they were allocated with new and are on the heap)
+    delete_trie(root);
 
     return word_positions;
 }
