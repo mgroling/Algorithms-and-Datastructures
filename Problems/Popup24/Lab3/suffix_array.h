@@ -1,52 +1,113 @@
 // Authors: Marc Gröling
+// Methods for general use: create_suffix_array
+// Helper methods: counting_sort_initial, counting_sort
 
 #ifndef suffix_array_h
 #define suffix_array_h
 
-#include <algorithm>
 #include <string>
+#include <tuple>
 #include <vector>
 
-struct CharacterComparator
+std::pair<std::vector<int>, std::vector<int>> counting_sort_initial(std::vector<int> &suffix_array,
+                                                                    const std::string &word)
 {
-    const std::string &str;
+    // only sort by first char
+    std::vector<std::vector<int>> count(256, std::vector<int>{});
+    std::vector<int> corresponding_bucket(word.size());
+    std::vector<int> bucket_start;
 
-    CharacterComparator(const std::string &s) : str(s)
+    for (int i = 0; i < suffix_array.size(); i++)
     {
+        count[word[i]].push_back(suffix_array[i]);
     }
 
-    bool operator()(int a, int b) const
+    int offset = 0;
+    int bucket = -1;
+    bucket_start.push_back(0);
+    // compute bucket sizes and for each element which bucket it belongs to
+    for (int i = 0; i < count.size(); i++)
     {
-        return str[a] < str[b];
-    }
-};
+        if (count[i].size())
+        {
+            bucket++;
+            bucket_start.push_back(count[i].size());
+        }
 
-struct BucketComparator
+        for (int j = 0; j < count[i].size(); j++)
+        {
+            suffix_array[offset++] = count[i][j];
+            corresponding_bucket[count[i][j]] = bucket;
+        }
+    }
+
+    // convert bucket sizes to the start of the bucket
+    for (int i = 1; i < bucket_start.size(); i++)
+    {
+        bucket_start[i] += bucket_start[i - 1];
+    }
+    bucket_start.pop_back();
+
+    return {corresponding_bucket, bucket_start};
+}
+
+std::vector<int> counting_sort(std::vector<int> &suffix_array, const int &k,
+                               const std::vector<int> &corresponding_bucket, std::vector<int> &bucket_start)
 {
-    std::vector<int> buckets;
-    int k;
+    int n = suffix_array.size();
+    std::vector<std::vector<int>> count(bucket_start.size(), std::vector<int>{});
 
-    BucketComparator(const std::vector<int> &buckets, const int &k)
+    // insert elements into count that don't have an empty suffix (on the second k characters)
+    for (int i = 0; i < n - k; i++)
     {
-        this->buckets = buckets;
-        this->k = k >> 1;
+        count[corresponding_bucket[i + k]].push_back(i);
     }
 
-    bool operator()(int a, int b) const
+    // insert elements with an empty suffix (on the last k characters) directly into the suffix array (in their buckets)
+    // in reverse order, since "aa" < "aaa" (equal on first n characters, then the word with size n is always smaller)
+    for (int i = n - 1; i >= n - k; i--)
     {
-        if (a + k >= buckets.size())
-        {
-            return true;
-        }
-        else if (b + k >= buckets.size())
-        {
-            return false;
-        }
-        return buckets[a + k] < buckets[b + k];
+        suffix_array[bucket_start[corresponding_bucket[i]]] = i;
+        // shift start of that bucket one place to the right
+        bucket_start[corresponding_bucket[i]]++;
     }
-};
 
-std::vector<int> create_suffix_array(std::string word)
+    // insert elements with a non-empty suffix
+    for (int i = 0; i < count.size(); i++)
+    {
+        for (int j = 0; j < count[i].size(); j++)
+        {
+            // get the bucket of that element and place it in the suffix array
+            suffix_array[bucket_start[corresponding_bucket[count[i][j]]]] = count[i][j];
+            // shift start of that bucket one place to the right
+            bucket_start[corresponding_bucket[count[i][j]]]++;
+        }
+    }
+
+    int bucket = 0;
+    bucket_start.clear();
+    bucket_start.push_back(bucket);
+    std::vector<int> corresponding_bucket_new(suffix_array.size());
+    corresponding_bucket_new[suffix_array[0]] = bucket;
+    // recompute bucket information
+    for (int i = 1; i < suffix_array.size(); i++)
+    {
+        int temp1 = suffix_array[i] + k < corresponding_bucket.size() ? corresponding_bucket[suffix_array[i] + k] : -1;
+        int temp2 =
+            suffix_array[i - 1] + k < corresponding_bucket.size() ? corresponding_bucket[suffix_array[i - 1] + k] : -2;
+        // if either the first k characters are in a different bucket or the last k, then we create a new bucket
+        if (corresponding_bucket[suffix_array[i]] != corresponding_bucket[suffix_array[i - 1]] || temp1 != temp2)
+        {
+            bucket++;
+            bucket_start.push_back(i);
+        }
+        corresponding_bucket_new[suffix_array[i]] = bucket;
+    }
+
+    return corresponding_bucket_new;
+}
+
+std::vector<int> create_suffix_array(const std::string &word)
 {
     std::vector<int> suffix_array;
     suffix_array.reserve(word.size());
@@ -54,65 +115,18 @@ std::vector<int> create_suffix_array(std::string word)
     {
         suffix_array.push_back(i);
     }
-    // sort suffixes by their first character
-    std::sort(suffix_array.begin(), suffix_array.end(), CharacterComparator(word));
-
-    // now compute which bucket they belong to (characters with the same starting char belong to the same bucket)
-    std::vector<int> corresponding_bucket(word.size());
-    std::vector<int> bucket_sizes;
-    bucket_sizes.push_back(1);
-    corresponding_bucket[suffix_array[0]] = 0;
-    int bucket = 0;
-    for (int i = 1; i < suffix_array.size(); i++)
-    {
-        if (word[suffix_array[i]] != word[suffix_array[i - 1]])
-        {
-            bucket++;
-            bucket_sizes.push_back(0);
-        }
-        corresponding_bucket[suffix_array[i]] = bucket;
-        bucket_sizes.back()++;
-    }
+    // sort suffixes by their first character and compute the corresponding bucket and the start index of each bucket
+    std::vector<int> corresponding_bucket, bucket_start;
+    std::tie(corresponding_bucket, bucket_start) = counting_sort_initial(suffix_array, word);
 
     // now use the information on the buckets to sort the array in exponential steps
-    for (int k = 2; k < word.size(); k = k << 1)
+    for (int k = 1; k < word.size(); k = k << 1)
     {
-        BucketComparator comp = BucketComparator(corresponding_bucket, k);
-        int offset = 0;
-        // sort each bucket individually
-        for (int i = 0; i < bucket_sizes.size(); i++)
-        {
-            std::sort(offset + suffix_array.begin(), offset + suffix_array.begin() + bucket_sizes[i], comp);
-            offset += bucket_sizes[i];
-        }
+        // the first k characters of the array are sorted, sort on the next k ones
+        corresponding_bucket = counting_sort(suffix_array, k, corresponding_bucket, bucket_start);
 
-        // recompute corresponding buckets and bucket sizes arrays
-        std::vector<int> corresponding_bucket_new(word.size());
-        int k_halved = k >> 1;
-        corresponding_bucket_new[suffix_array[0]] = 0;
-        bucket = 0;
-        bucket_sizes.clear();
-        bucket_sizes.push_back(1);
-        for (int i = 1; i < suffix_array.size(); i++)
-        {
-            int temp1 = suffix_array[i] + k_halved < corresponding_bucket.size()
-                            ? corresponding_bucket[suffix_array[i] + k_halved]
-                            : -1;
-            int temp2 = suffix_array[i - 1] + k_halved < corresponding_bucket.size()
-                            ? corresponding_bucket[suffix_array[i - 1] + k_halved]
-                            : -2;
-            if (temp1 != temp2)
-            {
-                bucket++;
-                bucket_sizes.push_back(0);
-            }
-            corresponding_bucket_new[suffix_array[i]] = bucket;
-            bucket_sizes.back()++;
-        }
-        corresponding_bucket = corresponding_bucket_new;
-
-        // array is sorted if this is true
-        if (corresponding_bucket.size() == word.size())
+        // number of buckets equals number of elements => array is sorted
+        if (bucket_start.size() == word.size())
         {
             break;
         }

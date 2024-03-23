@@ -17,7 +17,7 @@ std::vector<int> solve_test_case(const Test_case &test_case)
         indices.push_back(suffix_array[index]);
     }
 
-    return suffix_array;
+    return indices;
 }
 
 std::vector<std::vector<int>> solve_problem(const std::vector<Test_case> &input)
