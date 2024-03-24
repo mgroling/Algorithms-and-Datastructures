@@ -48,12 +48,11 @@ std::vector<std::vector<int>> parse_input(const std::vector<std::string> &input)
     int num_sequences = std::stoi(input[0]);
     sequences.reserve(num_sequences);
 
-    // reverse sequences for easier modification later
     for (int i = 1; i < input.size(); i++)
     {
         std::vector<int> sequence;
         std::vector<std::string> split_string = split(input[i], ' ');
-        for (int j = split_string.size() - 1; j >= 1; j--)
+        for (int j = 1; j < split_string.size(); j++)
         {
             sequence.emplace_back(std::stoi(split_string[j]));
         }
