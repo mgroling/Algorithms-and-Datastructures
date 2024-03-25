@@ -1,5 +1,5 @@
 // Authors: Marc Gröling
-// Methods for general use: create_suffix_array
+// Methods for general use: create_suffix_array, create_longest_common_prefix_array
 // Helper methods: counting_sort_initial, counting_sort
 
 #ifndef suffix_array_h
@@ -135,7 +135,7 @@ std::vector<int> create_suffix_array(const std::string &word)
     return suffix_array;
 }
 
-// computes the longest common prefix of the word
+// computes the longest common prefix array for the word
 std::vector<int> create_longest_common_prefix_array(const std::vector<int> &suffix_array, const std::string &word)
 {
     std::vector<int> lcp_array(word.size(), 0);
