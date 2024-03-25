@@ -135,4 +135,37 @@ std::vector<int> create_suffix_array(const std::string &word)
     return suffix_array;
 }
 
+// computes the longest common prefix of the word
+std::vector<int> create_longest_common_prefix_array(const std::vector<int> &suffix_array, const std::string &word)
+{
+    std::vector<int> lcp_array(word.size(), 0);
+    std::vector<int> rank(word.size(), 0);
+
+    for (int i = 0; i < word.size(); i++)
+    {
+        rank[suffix_array[i]] = i;
+    }
+
+    int lcp = 0;
+    for (int i = 0; i < word.size(); i++)
+    {
+        if (rank[i])
+        {
+            int j = suffix_array[rank[i] - 1];
+            while (i + lcp < word.size() && j + lcp < word.size() && word[i + lcp] == word[j + lcp])
+            {
+                lcp++;
+            }
+            lcp_array[rank[i]] = lcp;
+
+            if (lcp > 0)
+            {
+                lcp--;
+            }
+        }
+    }
+
+    return lcp_array;
+}
+
 #endif
