@@ -122,14 +122,14 @@ std::vector<int> create_suffix_array(const std::string &word)
     // now use the information on the buckets to sort the array in exponential steps
     for (int k = 1; k < word.size(); k = k << 1)
     {
-        // the first k characters of the array are sorted, sort on the next k ones
-        corresponding_bucket = counting_sort(suffix_array, k, corresponding_bucket, bucket_start);
-
         // number of buckets equals number of elements => array is sorted
         if (bucket_start.size() == word.size())
         {
             break;
         }
+
+        // the first k characters of the array are sorted, sort on the next k ones
+        corresponding_bucket = counting_sort(suffix_array, k, corresponding_bucket, bucket_start);
     }
 
     return suffix_array;
