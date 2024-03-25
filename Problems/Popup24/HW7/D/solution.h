@@ -68,8 +68,8 @@ bool's that indicates whether a cell is tileable or not. These are filled up by 
 then setting all characters of the street to true for the length of that pattern.
 
 One small optimization that was needed to improve the runtime was that when computing which words are contained in each
-node of the trie, we only add all the ones from the suffix link if the node is not a word of the dictionary (patterns)
-itself. This is because, all the words from the suffix link are strict suffixes of the word of the node (and we only
+node of the trie, we only add all the one from the suffix link if the node is not a word of the dictionary (patterns)
+itself. This is because, the word from the suffix link is a strict suffix of the word of the node (and we only
 care about covering each cell once).
 
 */
@@ -85,7 +85,6 @@ class TrieNode
     std::unordered_map<char, TrieNode *> children;
     TrieNode *suffix_link;
     std::vector<int> words;
-    bool is_word = false;
 };
 
 TrieNode *build_aho_corasick_trie(const std::vector<std::string> &words)
@@ -108,7 +107,6 @@ TrieNode *build_aho_corasick_trie(const std::vector<std::string> &words)
         }
         // this node portrays a word of the dictionary
         current->words.push_back(i);
-        current->is_word = true;
     }
 
     // build suffix links (in case of failure) to the longest strict suffix of all nodes
@@ -133,8 +131,8 @@ TrieNode *build_aho_corasick_trie(const std::vector<std::string> &words)
             }
             suffix_link = suffix_link == NULL ? root : suffix_link->children[child.first];
             child.second->suffix_link = suffix_link;
-            // only add words of suffix link if it is not a word itself
-            if (!child.second->is_word)
+            // only add words of suffix link if the trie node doesn't represent a word already
+            if (!child.second->words.size())
             {
                 child.second->words.insert(child.second->words.begin(), suffix_link->words.begin(),
                                            suffix_link->words.end());
