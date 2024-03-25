@@ -1,18 +1,68 @@
 /*
 ----------------------------------------------------- PROBLEM -----------------------------------------------------
 
+Pasijans, patience, or solitaire is the name for a group of single player card games. One new such game, so new it has
+no name, is played with cards sporting random integers as values. The game starts by shuffling all cards and
+distributing them in N sequences, not necessarily of equal length.
+
+During each turn, the player can remove the first card in any sequence and place it at the end of the “Solution
+sequence”. The card that was second in the selected sequence now becomes the first and the turn ends. Of course once the
+card is in the “Solution sequence” it cannot be removed, replaced or altered in any way. So don’t even try.
+
+The game ends when all cards are in the “Solution sequence”. The object of the game is to construct the best possible
+“Solution sequence”. One sequence is better than the other if for the first cards they differ, lets call them X and Y,
+the value on the card X is smaller than the value on the card Y.
+
+Write a program that finds the best possible “Solution sequence”.
 
 ----------------------------------------------------- INPUT -----------------------------------------------------
 
+The first line contains one integer N (1 <= N <= 1000), the number of starting sequences.
+
+The next N lines contain descriptions of input sequences. Each line starts with an integer L (1 <= L <= 1000), the
+length of the sequence. It is followed by L positive integers, each at most 100 000 000.
 
 ----------------------------------------------------- OUTPUT -----------------------------------------------------
 
+One line containing sum(L) numbers, the best possible “Solution sequence” obtainable.
 
 ----------------------------------------------------- EXAMPLE -----------------------------------------------------
 
+Sample Input 1:
+3
+1 2
+1 100
+1 1
+
+Sample Output 1:
+1 2 100
+
+Sample Input 2:
+2
+5 10 20 30 40 50
+2 28 27
+
+Sample Output 2:
+10 20 28 27 30 40 50
+
+Sample Input 3:
+2
+3 5 1 2
+3 5 1 1
+
+Sample Output 3:
+5 1 1 5 1 2
 
 ----------------------------------------------------- SOLUTION -----------------------------------------------------
 
+This problem seems very easy, except for the case that two sequences (or suffixes of these) have the same element in the
+beginning. If that is the case, then one should extract elements from the one that is smaller (for the first number that
+they differ, the one with the smaller one may be considered smaller).
+
+Doing this each time a comparison is needed would take too much time. However, we can use the algorithm to create a
+suffix array here. This way, we can order the suffixes of all sequences, which gives an easy way to define a comparator
+function between the suffixes of two sequences. To efficiently get the card from the smallest sequence available, a
+priority queue (binary heap) is used.
 
 */
 
@@ -23,6 +73,7 @@
 #include <unordered_map>
 #include <vector>
 
+// comparator for the initial sorting according to the first element of each sequence (and their suffixes).
 struct SequenceComparator
 {
     const std::vector<std::vector<int>> *sequences;
@@ -62,7 +113,8 @@ std::unordered_map<int, int> counting_sort(std::vector<std::pair<int, int>> &suf
         }
     }
 
-    // insert elements with a non-empty suffix
+    // insert elements with a non-empty suffix (longer sequences are better, so we insert these ones first before the
+    // other ones below)
     for (int i = 0; i < count.size(); i++)
     {
         for (int j = 0; j < count[i].size(); j++)
@@ -134,7 +186,7 @@ std::unordered_map<int, int> create_suffix_array(const std::vector<std::vector<i
         max_sequence_length = std::max(max_sequence_length, (int)sequences[i].size());
     }
 
-    // sort sequences (suffixes) by their first element
+    // sort sequences (and their suffixes) by their first element
     std::sort(suffix_array.begin(), suffix_array.end(), SequenceComparator(&sequences));
 
     // compute the corresponding bucket and the start index of each bucket
@@ -193,7 +245,7 @@ std::vector<int> solve_problem(std::vector<std::vector<int>> &problem)
 {
     std::unordered_map<int, int> corresponding_bucket = create_suffix_array(problem);
     // first elem of pair is the index of the sequences that the element is from and the second value is the index in
-    // the sequence
+    // the sequence (this describes a suffix of a sequence)
     std::priority_queue<std::pair<int, int>, std::vector<std::pair<int, int>>, CustomComparator> sequence_pq(
         CustomComparator(&corresponding_bucket, problem.size()));
     // index of next element that is not yet in the priority queue
