@@ -3,8 +3,7 @@
 
 int main()
 {
-    std::vector<std::string> input{"8", "cabcabca"};
-    std::string problem = parse_input(input);
+    std::string problem = parse_input(read_input());
     int solution = solve_problem(problem);
     std::cout << solution << '\n';
 
