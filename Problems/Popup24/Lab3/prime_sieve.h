@@ -107,4 +107,40 @@ class Prime_Sieve
     }
 };
 
+std::vector<std::pair<long long, long long>> find_prime_factors(long long number)
+{
+    std::vector<std::pair<long long, long long>> prime_factors;
+
+    // check how many 2's are factors in number
+    // !(number & 1) is equivalent to number % 2 == 0
+    long long number_of_2_factors = 0;
+    while (!(number & 1))
+    {
+        number_of_2_factors++;
+        number = number >> 1;
+    }
+    prime_factors.emplace_back(2, number_of_2_factors);
+
+    int candidate = 3;
+    // search for factors until the number is 1
+    while (number != 1)
+    {
+        long long num_factors = 0;
+        // divide by the candidate as many times as it is a factor
+        while (number % candidate == 0)
+        {
+            num_factors++;
+            number /= candidate;
+        }
+        // if num_factors > 0, then append it
+        if (num_factors)
+        {
+            prime_factors.emplace_back(candidate, num_factors);
+        }
+        candidate++;
+    }
+
+    return prime_factors;
+}
+
 #endif
