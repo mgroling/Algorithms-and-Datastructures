@@ -107,6 +107,7 @@ class Prime_Sieve
     }
 };
 
+// returns an array of tuples with (prime_factor, factorisation count)
 std::vector<std::pair<long long, int>> find_prime_factors(long long number)
 {
     std::vector<std::pair<long long, int>> prime_factors;
@@ -144,6 +145,27 @@ std::vector<std::pair<long long, int>> find_prime_factors(long long number)
     }
 
     return prime_factors;
+}
+
+// returns all factors of a number
+std::vector<long long> find_factors(const long long &number)
+{
+    std::vector<long long> factors;
+    double sqrt = std::sqrt(number);
+    for (int i = 1; i < sqrt; i++)
+    {
+        if (number % i == 0)
+        {
+            factors.push_back(i);
+            factors.push_back(number / i);
+        }
+    }
+    if (sqrt == (long long)sqrt && number % (long long)sqrt == 0)
+    {
+        factors.push_back(sqrt);
+    }
+
+    return factors;
 }
 
 #endif
