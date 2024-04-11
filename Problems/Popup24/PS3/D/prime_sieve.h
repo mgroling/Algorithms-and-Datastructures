@@ -1,0 +1,172 @@
+// Authors: Marc Gröling
+// small reminder: num << 1 === num * 2, num >> 1 === num / 2
+
+#ifndef prime_sieve
+#define prime_sieve
+
+#include <cmath>
+#include <stdexcept>
+#include <vector>
+
+// Datastructure that can answer if a number is prime in O(1) time
+// The construction takes O(n log_2(log_2(n))) time
+// And the datastructure requires ~n/2 space (only stores odd numbers)
+class Prime_Sieve
+{
+  public:
+    // uses Erathostenes' sieve for construction
+    Prime_Sieve(const int &max_num)
+    {
+        if (max_num <= 0)
+        {
+            throw std::invalid_argument("Invalid argument in Prime_Sieve constructor: Argument " +
+                                        std::to_string(max_num) + " must be > 0.");
+        }
+
+        max_number = max_num;
+        int size_vector = max_num / 4;
+        prime_vector = std::vector<bool>(size_vector, true);
+        int sqrt_max = std::ceil(std::sqrt(max_num));
+
+        // only need to loop to sqrt(max_num), since C = A * B (one of A or B must be <= sqrt(C))
+        int candidate = 5;
+        int index = 0;
+        while (candidate <= sqrt_max)
+        {
+            if (prime_vector[index])
+            {
+                int candidate_times_four = candidate * 4;
+                // can start at candidate squared, since numbers before will be checked by previous outer loop iteration
+                int candidate_multiplied = candidate * candidate;
+
+                while (candidate_multiplied <= max_num)
+                {
+                    int index_c = number_to_index(candidate_multiplied);
+                    prime_vector[index_c] = false;
+                    // can only consider candidate multiplied by an odd number
+                    candidate_multiplied += candidate_times_four;
+                }
+            }
+            // go through odd numbers
+            candidate += 4;
+            index++;
+        }
+
+        num_primes = std::vector<int>(prime_vector.size());
+        num_primes[0] = 1;
+        for (int i = 1; i < prime_vector.size(); i++)
+        {
+            num_primes[i] = num_primes[i - 1] + prime_vector[i];
+        }
+    }
+
+    // returns whether or not a number in [1, max_num] is prime
+    bool is_prime(const int &num)
+    {
+        if (num < 1 || num > max_number)
+        {
+            throw std::invalid_argument("Invalid argument in Prime_Sieve.is_prime: Argument " + std::to_string(num) +
+                                        " is outside of the allowed range [1, " + std::to_string(max_number) + "].");
+        }
+        if (num == 1)
+        {
+            return false;
+        }
+        return prime_vector[number_to_index(num)];
+    }
+
+    // returns the number of primes in [1, max_num]
+    int get_num_primes(int num)
+    {
+        if (num <= 4)
+        {
+            return 0;
+        }
+
+        while (num % 4 != 1)
+        {
+            num--;
+        }
+
+        return num_primes[number_to_index(num)];
+    }
+
+  private:
+    // only stores for odd numbers starting at 3
+    std::vector<bool> prime_vector;
+    std::vector<int> num_primes;
+    int max_number;
+
+    int index_to_number(const int &index)
+    {
+        return (index + 1) * 4 + 1;
+    }
+
+    int number_to_index(const int &prime_index)
+    {
+        return (prime_index - 1) / 4 - 1;
+    }
+};
+
+// returns an array of tuples with (prime_factor, factorisation count)
+std::vector<std::pair<long long, int>> find_prime_factors(long long number)
+{
+    std::vector<std::pair<long long, int>> prime_factors;
+
+    // check how many 2's are factors in number
+    // !(number & 1) is equivalent to number % 2 == 0
+    int number_of_2_factors = 0;
+    while (!(number & 1))
+    {
+        number_of_2_factors++;
+        number = number >> 1;
+    }
+    if (number_of_2_factors)
+    {
+        prime_factors.emplace_back(2, number_of_2_factors);
+    }
+
+    long long candidate = 3;
+    // search for factors until the number is 1
+    while (number != 1)
+    {
+        int num_factors = 0;
+        // divide by the candidate as many times as it is a factor
+        while (number % candidate == 0)
+        {
+            num_factors++;
+            number /= candidate;
+        }
+        // if num_factors > 0, then append it
+        if (num_factors)
+        {
+            prime_factors.emplace_back(candidate, num_factors);
+        }
+        candidate++;
+    }
+
+    return prime_factors;
+}
+
+// returns all factors of a number
+std::vector<long long> find_factors(const long long &number)
+{
+    std::vector<long long> factors;
+    double sqrt = std::sqrt(number);
+    for (int i = 1; i < sqrt; i++)
+    {
+        if (number % i == 0)
+        {
+            factors.push_back(i);
+            factors.push_back(number / i);
+        }
+    }
+    if (sqrt == (long long)sqrt && number % (long long)sqrt == 0)
+    {
+        factors.push_back(sqrt);
+    }
+
+    return factors;
+}
+
+#endif
