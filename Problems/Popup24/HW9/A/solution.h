@@ -199,7 +199,7 @@ int solve_test_case(const std::string &board_configuration)
     {
         return 0;
     }
-    // do a bfs starting from the initial position and the goal position simultaneously
+    // do a bfs starting from the initial position and the goal position simultaneously (meet in the middle)
     // save board config + whether the element was explored from the start or the goal
     std::queue<std::pair<int, bool>> game_position_queue;
     game_position_queue.emplace(start_position, true);
@@ -248,7 +248,7 @@ int solve_test_case(const std::string &board_configuration)
             // found from goal position
             else
             {
-                // unvisited position from start
+                // unvisited position from goal
                 if (ptr_goal_map == goal_distance.end())
                 {
                     // also present in the other map => sequence of moves found to move from start to goal
