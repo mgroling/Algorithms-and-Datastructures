@@ -52,6 +52,7 @@
         "chrono": "cpp",
         "ratio": "cpp",
         "set": "cpp",
-        "queue": "cpp"
+        "queue": "cpp",
+        "cassert": "cpp"
     }
 }
