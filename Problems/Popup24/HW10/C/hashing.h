@@ -51,7 +51,7 @@ class Polynomial_Hash_Family
         std::random_device rd;
         std::mt19937 gen(rd());
         std::uniform_int_distribution<> dis(0, 8);
-        M = large_primes[dis(gen)];
+        M = large_primes[0];
 
         // compute hashes for [0, 1), [0, 2), [0, 3), ... [0, n) (index of the word)
         hashes.reserve(word.size());
@@ -64,7 +64,7 @@ class Polynomial_Hash_Family
     }
 
     // computes the hash of word[start:end] (end is exclusive, notation from Python slicing)
-    uint64_t get_hash(const uint64_t &start, const uint64_t &end)
+    uint64_t get_hash(const uint64_t &start, const uint64_t &end) const
     {
         return modulo_subtract(
             hashes[end - 1], start > 0 ? modulo_multiply(hashes[start - 1], modulo_power(b, end - start, M), M) : 0, M);
