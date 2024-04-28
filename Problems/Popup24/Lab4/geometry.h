@@ -125,6 +125,10 @@ template <typename T> class Point
     }
 };
 
+// calculates whether two line segments intersect
+// if they are colinear and overlap, then it returns 2 points (the resulting line segment of all intersection points)
+// otherwise if they intersect it returns the intersection point and if they don't, then it simply returns an empty
+// vector
 template <typename T>
 std::vector<Point<double>> line_segment_intersection(const std::pair<Point<T>, Point<T>> &l1,
                                                      const std::pair<Point<T>, Point<T>> &l2)
@@ -161,6 +165,7 @@ std::vector<Point<double>> line_segment_intersection(const std::pair<Point<T>, P
         return output;
     }
     // case 2: line segments are not parallel and have an intersection point that may lie on both line segments
+    // formulas from Wikipedia line segment intersection
     double t = ((l1.first.x - l2.first.x) * (l2.first.y - l2.second.y) -
                 (l1.first.y - l2.first.y) * (l2.first.x - l2.second.x)) /
                determinant;
@@ -175,9 +180,11 @@ std::vector<Point<double>> line_segment_intersection(const std::pair<Point<T>, P
     return {};
 }
 
-// takes as input a closed polygon given as a vector of coordinates (x, y)
-// reminder: in a closed polygon the last point equals the first one
-// this method makes changes on the input vector during computation, but undoes these before returning
+// returns the signed area of a polygon (if the signed area is smaller than 0, then the coordinates are given in
+// clockwise fashion, otherwise in counter-clockwise fashion), to get the area, simply take the absolute value
+// takes as input a closed polygon given as a vector of coordinates (x, y) reminder: in a closed
+// polygon the last point equals the first one this method makes changes on the input vector during computation, but
+// undoes these before returning
 template <typename T> double compute_signed_area_polygon(std::vector<Point<T>> &points)
 {
     double area = 0;
