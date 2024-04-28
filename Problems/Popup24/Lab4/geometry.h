@@ -3,14 +3,14 @@
 #ifndef geometry_h
 #define geometry_h
 
-#include <algorithm>
 #include <cmath>
+#include <set>
 #include <stdexcept>
 #include <type_traits>
 #include <vector>
 
 // epislon for checking if values are "close" enough to zero
-const double EPSILON = 0.0000001;
+const double EPSILON = 1e-9;
 
 template <typename T> std::pair<T, T> min_max(const T &a, const T &b)
 {
@@ -129,84 +129,48 @@ template <typename T>
 std::vector<Point<double>> line_segment_intersection(const std::pair<Point<T>, Point<T>> &l1,
                                                      const std::pair<Point<T>, Point<T>> &l2)
 {
-    // case 1: line segments are on the same line and overlap each other
-    if ((l1.first - l2.first).cross_product(l1.first - l2.second) == 0 &&
-        (l1.second - l2.first).cross_product(l1.second - l2.second) == 0)
+    double determinant = (l1.first.x - l1.second.x) * (l2.first.y - l2.second.y) -
+                         (l1.first.y - l1.second.y) * (l2.first.x - l2.second.x);
+    // case 1: line segments are parallel and may be collinear (are on the same line)
+    if (std::abs(determinant) < EPSILON)
     {
-        // check that at least one of the points is on the other line segment
-        if (l1.first.on_line_segment(l2) || l1.second.on_line_segment(l2) || l2.first.on_line_segment(l1) ||
-            l2.second.on_line_segment(l1))
+        // if they are collinear, then the line segment or point that holds all points of intersections must consist of
+        // the end points of the two given line segments
+        std::set<std::pair<T, T>> points;
+        if (l1.first.on_line_segment(l2))
         {
-            std::vector<Point<T>> points{l1.first, l1.second, l2.first, l2.second};
-            // parallel to x-axis, sort by x values
-            if (l1.first.y == l1.second.y)
-            {
-                std::sort(points.begin(), points.end(), [](const Point<T> &a, const Point<T> &b) { return a.x < b.x; });
-            }
-            else
-            {
-                // otherwise sort by y values
-                std::sort(points.begin(), points.end(), [](const Point<T> &a, const Point<T> &b) { return a.y < b.y; });
-            }
-            // check that the middle points aren't equal
-            if (points[1] == points[2])
-            {
-                return {points[1].copy_double()};
-            }
-            return {points[1].copy_double(), points[2].copy_double()};
+            points.emplace(l1.first.x, l1.first.y);
         }
-        return {};
-    }
-    // case 2: line segments share a common vertex
-    if (l1.first == l2.first || l1.first == l2.second)
-    {
-        return {l1.first.copy_double()};
-    }
-    if (l1.second == l2.first || l1.second == l2.second)
-    {
-        return {l1.second.copy_double()};
-    }
-    // case 3: line segments intersect at a point that is not a point of any line segment
-    // check if either line is parallel to the y-axis
-    if (l1.first.x == l1.second.x)
-    {
-        // compute slope-intercept form for line 2
-        T m2 = (l2.second.y - l2.first.y) / (l2.second.x - l2.first.x);
-        T b2 = l2.first.y - m2 * l2.first.x;
-        Point<double> intersection_point = Point<double>(l1.first.x, m2 * l1.first.x + b2);
-        if (intersection_point.on_line_segment({l1.first.copy_double(), l1.second.copy_double()}) &&
-            intersection_point.on_line_segment({l2.first.copy_double(), l2.second.copy_double()}))
+        if (l1.second.on_line_segment(l2))
         {
-            return {intersection_point};
+            points.emplace(l1.second.x, l1.second.y);
         }
-        return {};
-    }
-    if (l2.first.x == l2.second.x)
-    {
-        // compute slope-intercept form for line 1
-        T m1 = (l1.second.y - l1.first.y) / (l1.second.x - l1.first.x);
-        T b1 = l1.first.y - m1 * l1.first.x;
-        Point<double> intersection_point = Point<double>(l2.first.x, m1 * l2.first.x + b1);
-        if (intersection_point.on_line_segment({l1.first.copy_double(), l1.second.copy_double()}) &&
-            intersection_point.on_line_segment({l2.first.copy_double(), l2.second.copy_double()}))
+        if (l2.first.on_line_segment(l1))
         {
-            return {intersection_point};
+            points.emplace(l2.first.x, l2.first.y);
         }
-        return {};
+        if (l2.second.on_line_segment(l1))
+        {
+            points.emplace(l2.second.x, l2.second.y);
+        }
+        std::vector<Point<double>> output;
+        for (const std::pair<T, T> &point : points)
+        {
+            output.emplace_back(point.first, point.second);
+        }
+        return output;
     }
-    // compute slope-intercept form for both lines
-    T m1 = (l1.second.y - l1.first.y) / (l1.second.x - l1.first.x);
-    T m2 = (l2.second.y - l2.first.y) / (l2.second.x - l2.first.x);
-    T b1 = l1.first.y - m1 * l1.first.x;
-    T b2 = l2.first.y - m2 * l2.first.x;
-    // compute intersection point
-    double x_intersect = (double)(b2 - b1) / (m1 - m2);
-    Point<double> intersection_point = Point<double>(x_intersect, m1 * x_intersect + b1);
-    // check that the intersection point lies on both line segments
-    if (intersection_point.on_line_segment({l1.first.copy_double(), l1.second.copy_double()}) &&
-        intersection_point.on_line_segment({l2.first.copy_double(), l2.second.copy_double()}))
+    // case 2: line segments are not parallel and have an intersection point that may lie on both line segments
+    double t = ((l1.first.x - l2.first.x) * (l2.first.y - l2.second.y) -
+                (l1.first.y - l2.first.y) * (l2.first.x - l2.second.x)) /
+               determinant;
+    double u = -((l1.first.x - l1.second.x) * (l1.first.y - l2.first.y) -
+                 (l1.first.y - l1.second.y) * (l1.first.x - l2.first.x)) /
+               determinant;
+    if (0 <= t && t <= 1 && 0 <= u && u <= 1)
     {
-        return {intersection_point};
+        return {
+            Point<double>(l1.first.x + t * (l1.second.x - l1.first.x), l1.first.y + t * (l1.second.y - l1.first.y))};
     }
     return {};
 }
