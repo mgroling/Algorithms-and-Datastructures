@@ -5,20 +5,19 @@
 
 #include <vector>
 
-std::vector<double> solve_test_case(const std::vector<Point<double>> &test_case)
+std::vector<double> solve_test_case(std::vector<Point<double>> &points)
 {
-    std::pair<int, int> indices = closest_pair(test_case);
+    std::pair<Point<double>, Point<double>> closest = closest_pair(points);
 
-    return {test_case[indices.first].x, test_case[indices.first].y, test_case[indices.second].x,
-            test_case[indices.second].y};
+    return {closest.first.x, closest.first.y, closest.second.x, closest.second.y};
 }
 
-std::vector<std::vector<double>> solve_problem(const std::vector<std::vector<Point<double>>> &input)
+std::vector<std::vector<double>> solve_problem(std::vector<std::vector<Point<double>>> &input)
 {
     std::vector<std::vector<double>> output;
     output.reserve(input.size());
 
-    for (const std::vector<Point<double>> &test_case : input)
+    for (std::vector<Point<double>> &test_case : input)
     {
         output.push_back(solve_test_case(test_case));
     }
