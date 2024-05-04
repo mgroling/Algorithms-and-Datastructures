@@ -127,10 +127,31 @@ template <typename T> class Point
         return std::abs((u).cross_product(v)) < EPSILON && u.dot_product(v) <= 0;
     }
 
+    double distance_line_segment(const std::pair<Point, Point> &line_segment) const
+    {
+        if (line_segment.first == line_segment.second)
+        {
+            return (*this - line_segment.first).magnitude();
+        }
+
+        Point direction_segment = line_segment.second - line_segment.first;
+        Point vector_to_point1 = (*this - line_segment.first);
+        Point vector_to_point2 = (*this - line_segment.second);
+        // check if the point lies between the two end points
+        if (vector_to_point1.dot_product(direction_segment) >= 0 &&
+            vector_to_point2.dot_product(direction_segment) <= 0)
+        {
+            // distance from point to (infinite) line
+            return std::abs((direction_segment).cross_product(vector_to_point1) / direction_segment.magnitude());
+        }
+        // otherwise the result is the minimum distance to the end points
+        return std::min(vector_to_point1.magnitude(), vector_to_point2.magnitude());
+    }
+
     // returns whether or not this point is inside/on/outside of the given polygon
     // 1: point is inside the polygon, 0: point is on a line segment of the polygon, -1: point is outside the polygon
     // assumes that the polygon is closed (first point equals last)
-    int inside_polygon(const std::vector<Point<T>> &polygon)
+    int inside_polygon(const std::vector<Point<T>> &polygon) const
     {
         assert(polygon[0] == polygon.back() &&
                "Assert failed in Point.inside_polygon: Polygon must be given in closed form.");
@@ -216,6 +237,23 @@ std::vector<Point<double>> line_segment_intersection(const std::pair<Point<T>, P
             Point<double>(l1.first.x + t * (l1.second.x - l1.first.x), l1.first.y + t * (l1.second.y - l1.first.y))};
     }
     return {};
+}
+
+template <typename T>
+double line_segment_distance(const std::pair<Point<T>, Point<T>> &l1, const std::pair<Point<T>, Point<T>> &l2)
+{
+    // lines intersect
+    if (line_segment_intersection(l1, l2).size())
+    {
+        return 0;
+    }
+
+    double min = l1.first.distance_line_segment(l2);
+    min = std::min(l1.second.distance_line_segment(l2), min);
+    min = std::min(l2.first.distance_line_segment(l1), min);
+    min = std::min(l2.second.distance_line_segment(l1), min);
+
+    return min;
 }
 
 // returns the signed area of a polygon (if the signed area is smaller than 0, then the coordinates are given in
