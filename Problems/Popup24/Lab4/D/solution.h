@@ -5,7 +5,7 @@
 
 #include <vector>
 
-std::vector<std::vector<std::pair<double, double>>> solve_problem(std::vector<std::vector<int>> &input)
+std::vector<std::vector<std::pair<double, double>>> solve_problem(const std::vector<std::vector<int>> &input)
 {
     std::vector<std::vector<std::pair<double, double>>> output(input.size(), std::vector<std::pair<double, double>>{});
 

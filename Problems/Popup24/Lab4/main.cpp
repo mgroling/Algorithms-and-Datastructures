@@ -4,12 +4,13 @@
 
 int main()
 {
-    Point p1 = Point(1, 1);
-    Point p2 = Point(2, 2);
-    Point p3 = Point(2, 2);
-    Point p4 = Point(4, 4);
+    Point<double> p1 = Point<double>(3, 1);
+    Point<double> p2 = Point<double>(5, 2);
+    Point<double> p3 = Point<double>(1, 2);
+    Point<double> p4 = Point<double>(4, 4);
 
-    std::cout << p1.distance_line_segment({p2, p3}) << '\n';
+    std::vector<Point<double>> points{p1, p2, p3, p4};
+    closest_pair(points);
 
     return 0;
 }

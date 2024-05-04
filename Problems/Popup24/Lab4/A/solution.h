@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-std::vector<uint64_t> solve_problem(std::pair<std::string, std::vector<std::pair<int, int>>> &input)
+std::vector<uint64_t> solve_problem(const std::pair<std::string, std::vector<std::pair<int, int>>> &input)
 {
     std::vector<uint64_t> output;
 

@@ -3,9 +3,11 @@
 #ifndef geometry_h
 #define geometry_h
 
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <iostream>
+#include <limits>
 #include <set>
 #include <stdexcept>
 #include <type_traits>
@@ -284,6 +286,113 @@ template <typename T> double compute_signed_area_polygon(std::vector<Point<T>> &
     }
 
     return area / 2;
+}
+
+// struct to support sorting points by x coordinate
+struct Point_Index_x
+{
+    int index;
+    const std::vector<Point<double>> *points;
+
+    Point_Index_x(const int &index, const std::vector<Point<double>> *ptr)
+    {
+        this->index = index;
+        this->points = ptr;
+    }
+
+    bool operator<(const Point_Index_x &other) const
+    {
+        return (*points)[index].x < (*points)[other.index].x;
+    }
+};
+
+// struct to support sorting points by y coordinate
+struct Point_Index_y
+{
+    int index;
+    const std::vector<Point<double>> *points;
+
+    Point_Index_y(const int &index, const std::vector<Point<double>> *ptr)
+    {
+        this->index = index;
+        this->points = ptr;
+    }
+
+    bool operator<(const Point_Index_y &other) const
+    {
+        return (*points)[index].y < (*points)[other.index].y;
+    }
+};
+
+std::pair<int, int> closest_pair(const std::vector<Point<double>> &points)
+{
+    int pair_index1 = -1;
+    int pair_index2 = -1;
+    double distance = std::numeric_limits<double>::max();
+    // store interesting points ordered by y coordinate
+    std::set<Point_Index_y> interesting_points;
+
+    // sort points by x coordinate
+    std::vector<Point_Index_x> points_x;
+    points_x.reserve(points.size());
+    for (int i = 0; i < points.size(); i++)
+    {
+        points_x.emplace_back(i, &points);
+    }
+    std::sort(points_x.begin(), points_x.end());
+
+    Point<double> cur;
+    Point<double> other;
+
+    // go through points by increasing x coordinate
+    for (const Point_Index_x &p : points_x)
+    {
+        cur = points[p.index];
+        double temp = cur.y - distance;
+        std::set<Point_Index_y>::iterator it =
+            std::find_if(interesting_points.begin(), interesting_points.end(), [&](const Point_Index_y &point_index) {
+                return (*point_index.points)[point_index.index].y > temp;
+            });
+
+        // save points to remove for later (removing elements while iterating over an object would lead to undefined
+        // behaviour)
+        std::vector<Point_Index_y> to_remove;
+        while (it != interesting_points.end())
+        {
+            other = points[it->index];
+            // point is too far away from sweeping line to be of interest anymore
+            if (other.x <= cur.x - distance)
+            {
+                to_remove.emplace_back(it->index, it->points);
+            }
+
+            // point is outside of bounding box that can contain points that are closer than distance
+            if (other.y >= cur.y + distance)
+            {
+                break;
+            }
+
+            // update distance
+            double temp_dist = (cur - other).magnitude();
+            if (temp_dist < distance)
+            {
+                distance = temp_dist;
+                pair_index1 = p.index;
+                pair_index2 = it->index;
+            }
+            it++;
+        }
+
+        // remove points that are no longer interesting
+        for (const Point_Index_y &elem : to_remove)
+        {
+            interesting_points.erase(elem);
+        }
+        // add cur
+        interesting_points.emplace(p.index, p.points);
+    }
+
+    return {pair_index1, pair_index2};
 }
 
 #endif

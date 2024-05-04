@@ -5,7 +5,7 @@
 
 #include <vector>
 
-std::vector<double> solve_problem(std::vector<std::vector<int>> &input)
+std::vector<double> solve_problem(const std::vector<std::vector<int>> &input)
 {
     std::vector<double> output;
     output.reserve(input.size());
