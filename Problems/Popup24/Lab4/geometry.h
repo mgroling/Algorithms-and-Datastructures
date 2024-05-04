@@ -288,82 +288,41 @@ template <typename T> double compute_signed_area_polygon(std::vector<Point<T>> &
     return area / 2;
 }
 
-// struct to support sorting points by x coordinate
-struct Point_Index_x
+template <typename T> std::pair<Point<T>, Point<T>> closest_pair(std::vector<Point<T>> &points)
 {
-    int index;
-    const std::vector<Point<double>> *points;
-
-    Point_Index_x(const int &index, const std::vector<Point<double>> *ptr)
-    {
-        this->index = index;
-        this->points = ptr;
-    }
-
-    bool operator<(const Point_Index_x &other) const
-    {
-        return (*points)[index].x < (*points)[other.index].x;
-    }
-};
-
-// struct to support sorting points by y coordinate
-struct Point_Index_y
-{
-    int index;
-    const std::vector<Point<double>> *points;
-
-    Point_Index_y(const int &index, const std::vector<Point<double>> *ptr)
-    {
-        this->index = index;
-        this->points = ptr;
-    }
-
-    bool operator<(const Point_Index_y &other) const
-    {
-        return (*points)[index].y < (*points)[other.index].y;
-    }
-};
-
-std::pair<int, int> closest_pair(const std::vector<Point<double>> &points)
-{
-    int pair_index1 = -1;
-    int pair_index2 = -1;
+    Point<T> p1;
+    Point<T> p2;
     double distance = std::numeric_limits<double>::max();
+
+    // comparator to sort by x/y value
+    auto compare_by_x = [](const Point<T> &a, const Point<T> &b) { return a.x < b.x; };
+    auto compare_by_y = [](const Point<T> &a, const Point<T> &b) { return a.y < b.y; };
+
     // store interesting points ordered by y coordinate
-    std::set<Point_Index_y> interesting_points;
+    std::set<Point<T>, decltype(compare_by_y)> interesting_points(compare_by_y);
 
     // sort points by x coordinate
-    std::vector<Point_Index_x> points_x;
-    points_x.reserve(points.size());
-    for (int i = 0; i < points.size(); i++)
-    {
-        points_x.emplace_back(i, &points);
-    }
-    std::sort(points_x.begin(), points_x.end());
+    std::sort(points.begin(), points.end(), compare_by_x);
 
-    Point<double> cur;
-    Point<double> other;
+    Point<T> other;
 
     // go through points by increasing x coordinate
-    for (const Point_Index_x &p : points_x)
+    for (const Point<T> &cur : points)
     {
-        cur = points[p.index];
-        double temp = cur.y - distance;
-        std::set<Point_Index_y>::iterator it =
-            std::find_if(interesting_points.begin(), interesting_points.end(), [&](const Point_Index_y &point_index) {
-                return (*point_index.points)[point_index.index].y > temp;
-            });
+        // get first point with y > cur.y - d
+        auto it = std::find_if(interesting_points.begin(), interesting_points.end(),
+                               [&](const Point<T> &point) { return point.y > cur.y - distance; });
 
         // save points to remove for later (removing elements while iterating over an object would lead to undefined
         // behaviour)
-        std::vector<Point_Index_y> to_remove;
+        std::vector<Point<T>> to_remove;
         while (it != interesting_points.end())
         {
-            other = points[it->index];
+            other = *it;
             // point is too far away from sweeping line to be of interest anymore
             if (other.x <= cur.x - distance)
             {
-                to_remove.emplace_back(it->index, it->points);
+                to_remove.push_back(other);
             }
 
             // point is outside of bounding box that can contain points that are closer than distance
@@ -377,22 +336,64 @@ std::pair<int, int> closest_pair(const std::vector<Point<double>> &points)
             if (temp_dist < distance)
             {
                 distance = temp_dist;
-                pair_index1 = p.index;
-                pair_index2 = it->index;
+                p1 = cur;
+                p2 = other;
             }
             it++;
         }
 
         // remove points that are no longer interesting
-        for (const Point_Index_y &elem : to_remove)
+        for (const Point<T> &elem : to_remove)
         {
             interesting_points.erase(elem);
         }
-        // add cur
-        interesting_points.emplace(p.index, p.points);
+        interesting_points.insert(cur);
     }
 
-    return {pair_index1, pair_index2};
+    return {p1, p2};
+}
+
+template <typename T> std::vector<Point<T>> convex_hull(std::vector<Point<T>> &points)
+{
+    // get the bottom-left point
+    Point<T> min_point = points[0];
+    for (int i = 1; i < points.size(); i++)
+    {
+        if (points[i].y < min_point.y || (points[i].y == min_point.y && points[i].x < min_point.x))
+        {
+            min_point = points[i];
+        }
+    }
+
+    // create function to compare points by angle viewed from min_point (in case of ties, the closer point to min_point
+    // should come first)
+    auto compare_by_angle = [&](const Point<T> &a, const Point<T> &b) {
+        T cross = (a - min_point).cross_product(b - min_point);
+        if (std::abs(cross) < EPSILON)
+        {
+            return (a - min_point).magnitude() < (b - min_point).magnitude();
+        }
+        return cross > 0;
+    };
+    std::sort(points.begin(), points.end(), compare_by_angle);
+
+    std::vector<Point<T>> hull{min_point};
+    for (const Point<T> p : points)
+    {
+        if (p == min_point)
+        {
+            continue;
+        }
+
+        // pop points from hull while it is not making a left turn to the new point
+        while (hull.size() >= 2 && (hull.back() - hull[hull.size() - 2]).cross_product(p - hull[hull.size() - 2]) <= 0)
+        {
+            hull.pop_back();
+        }
+        hull.push_back(p);
+    }
+
+    return hull;
 }
 
 #endif
