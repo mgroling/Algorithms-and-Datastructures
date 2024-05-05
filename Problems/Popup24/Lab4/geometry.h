@@ -13,7 +13,7 @@
 #include <type_traits>
 #include <vector>
 
-// epislon for checking if values are "close" enough to zero
+// epsilon for checking if values are "close" enough to zero
 const double EPSILON = 1e-9;
 
 template <typename T> std::pair<T, T> min_max(const T &a, const T &b)
@@ -288,6 +288,8 @@ template <typename T> double compute_signed_area_polygon(std::vector<Point<T>> &
     return area / 2;
 }
 
+// computes the closest pair of points in the given vector
+// in case of ties, it returns any closest pair
 template <typename T> std::pair<Point<T>, Point<T>> closest_pair(std::vector<Point<T>> &points)
 {
     Point<T> p1;
@@ -310,8 +312,7 @@ template <typename T> std::pair<Point<T>, Point<T>> closest_pair(std::vector<Poi
     for (const Point<T> &cur : points)
     {
         // get first point with y > cur.y - d
-        auto it = std::find_if(interesting_points.begin(), interesting_points.end(),
-                               [&](const Point<T> &point) { return point.y > cur.y - distance; });
+        auto it = interesting_points.upper_bound(Point<T>(0, cur.y - distance));
 
         // save points to remove for later (removing elements while iterating over an object would lead to undefined
         // behaviour)
