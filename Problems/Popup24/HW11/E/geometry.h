@@ -3,15 +3,17 @@
 #ifndef geometry_h
 #define geometry_h
 
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <iostream>
+#include <limits>
 #include <set>
 #include <stdexcept>
 #include <type_traits>
 #include <vector>
 
-// epislon for checking if values are "close" enough to zero
+// epsilon for checking if values are "close" enough to zero
 const double EPSILON = 1e-9;
 
 template <typename T> std::pair<T, T> min_max(const T &a, const T &b)
@@ -127,10 +129,31 @@ template <typename T> class Point
         return std::abs((u).cross_product(v)) < EPSILON && u.dot_product(v) <= 0;
     }
 
+    double distance_line_segment(const std::pair<Point, Point> &line_segment) const
+    {
+        if (line_segment.first == line_segment.second)
+        {
+            return (*this - line_segment.first).magnitude();
+        }
+
+        Point direction_segment = line_segment.second - line_segment.first;
+        Point vector_to_point1 = (*this - line_segment.first);
+        Point vector_to_point2 = (*this - line_segment.second);
+        // check if the point lies between the two end points
+        if (vector_to_point1.dot_product(direction_segment) >= 0 &&
+            vector_to_point2.dot_product(direction_segment) <= 0)
+        {
+            // distance from point to (infinite) line
+            return std::abs((direction_segment).cross_product(vector_to_point1) / direction_segment.magnitude());
+        }
+        // otherwise the result is the minimum distance to the end points
+        return std::min(vector_to_point1.magnitude(), vector_to_point2.magnitude());
+    }
+
     // returns whether or not this point is inside/on/outside of the given polygon
     // 1: point is inside the polygon, 0: point is on a line segment of the polygon, -1: point is outside the polygon
     // assumes that the polygon is closed (first point equals last)
-    int inside_polygon(const std::vector<Point<T>> &polygon)
+    int inside_polygon(const std::vector<Point<T>> &polygon) const
     {
         assert(polygon[0] == polygon.back() &&
                "Assert failed in Point.inside_polygon: Polygon must be given in closed form.");
@@ -218,6 +241,23 @@ std::vector<Point<double>> line_segment_intersection(const std::pair<Point<T>, P
     return {};
 }
 
+template <typename T>
+double line_segment_distance(const std::pair<Point<T>, Point<T>> &l1, const std::pair<Point<T>, Point<T>> &l2)
+{
+    // lines intersect
+    if (line_segment_intersection(l1, l2).size())
+    {
+        return 0;
+    }
+
+    double min = l1.first.distance_line_segment(l2);
+    min = std::min(l1.second.distance_line_segment(l2), min);
+    min = std::min(l2.first.distance_line_segment(l1), min);
+    min = std::min(l2.second.distance_line_segment(l1), min);
+
+    return min;
+}
+
 // returns the signed area of a polygon (if the signed area is smaller than 0, then the coordinates are given in
 // clockwise fashion, otherwise in counter-clockwise fashion), to get the area, simply take the absolute value
 // takes as input a closed polygon given as a vector of coordinates (x, y) reminder: in a closed
@@ -246,6 +286,115 @@ template <typename T> double compute_signed_area_polygon(std::vector<Point<T>> &
     }
 
     return area / 2;
+}
+
+// computes the closest pair of points in the given vector
+// in case of ties, it returns any closest pair
+template <typename T> std::pair<Point<T>, Point<T>> closest_pair(std::vector<Point<T>> &points)
+{
+    Point<T> p1;
+    Point<T> p2;
+    double distance = std::numeric_limits<double>::max();
+
+    // comparator to sort by x/y value
+    auto compare_by_x = [](const Point<T> &a, const Point<T> &b) { return a.x < b.x; };
+    auto compare_by_y = [](const Point<T> &a, const Point<T> &b) { return a.y < b.y; };
+
+    // store interesting points ordered by y coordinate
+    std::set<Point<T>, decltype(compare_by_y)> interesting_points(compare_by_y);
+
+    // sort points by x coordinate
+    std::sort(points.begin(), points.end(), compare_by_x);
+
+    Point<T> other;
+
+    // go through points by increasing x coordinate
+    for (const Point<T> &cur : points)
+    {
+        // get first point with y > cur.y - d
+        auto it = interesting_points.upper_bound(Point<T>(0, cur.y - distance));
+
+        // save points to remove for later (removing elements while iterating over an object would lead to undefined
+        // behaviour)
+        std::vector<Point<T>> to_remove;
+        while (it != interesting_points.end())
+        {
+            other = *it;
+            // point is too far away from sweeping line to be of interest anymore
+            if (other.x <= cur.x - distance)
+            {
+                to_remove.push_back(other);
+            }
+
+            // point is outside of bounding box that can contain points that are closer than distance
+            if (other.y >= cur.y + distance)
+            {
+                break;
+            }
+
+            // update distance
+            double temp_dist = (cur - other).magnitude();
+            if (temp_dist < distance)
+            {
+                distance = temp_dist;
+                p1 = cur;
+                p2 = other;
+            }
+            it++;
+        }
+
+        // remove points that are no longer interesting
+        for (const Point<T> &elem : to_remove)
+        {
+            interesting_points.erase(elem);
+        }
+        interesting_points.insert(cur);
+    }
+
+    return {p1, p2};
+}
+
+template <typename T> std::vector<Point<T>> convex_hull(std::vector<Point<T>> &points)
+{
+    // get the bottom-left point
+    Point<T> min_point = points[0];
+    for (int i = 1; i < points.size(); i++)
+    {
+        if (points[i].y < min_point.y || (points[i].y == min_point.y && points[i].x < min_point.x))
+        {
+            min_point = points[i];
+        }
+    }
+
+    // create function to compare points by angle viewed from min_point (in case of ties, the closer point to min_point
+    // should come first)
+    auto compare_by_angle = [&](const Point<T> &a, const Point<T> &b) {
+        T cross = (a - min_point).cross_product(b - min_point);
+        if (std::abs(cross) < EPSILON)
+        {
+            return (a - min_point).magnitude() < (b - min_point).magnitude();
+        }
+        return cross > 0;
+    };
+    std::sort(points.begin(), points.end(), compare_by_angle);
+
+    std::vector<Point<T>> hull{min_point};
+    for (const Point<T> p : points)
+    {
+        if (p == min_point)
+        {
+            continue;
+        }
+
+        // pop points from hull while it is not making a left turn to the new point
+        while (hull.size() >= 2 && (hull.back() - hull[hull.size() - 2]).cross_product(p - hull[hull.size() - 2]) <= 0)
+        {
+            hull.pop_back();
+        }
+        hull.push_back(p);
+    }
+
+    return hull;
 }
 
 #endif
