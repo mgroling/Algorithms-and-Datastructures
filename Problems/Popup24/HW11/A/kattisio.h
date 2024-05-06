@@ -45,14 +45,15 @@ std::vector<std::string> read_input()
     return output;
 }
 
-std::pair<std::vector<Point<int>>, std::vector<Point<int>>> parse_input(const std::vector<std::string> &input)
+std::pair<std::vector<Point<long double>>, std::vector<Point<long double>>> parse_input(
+    const std::vector<std::string> &input)
 {
     std::vector<std::string> split_string = split(input[0], ' ');
     int num_toys = std::stoi(split_string[0]);
     int num_trees = std::stoi(split_string[1]);
-    std::vector<Point<int>> toys;
+    std::vector<Point<long double>> toys;
     toys.reserve(num_toys);
-    std::vector<Point<int>> trees;
+    std::vector<Point<long double>> trees;
     trees.reserve(num_trees);
 
     for (int i = 1; i < num_toys + 1; i++)
@@ -70,7 +71,7 @@ std::pair<std::vector<Point<int>>, std::vector<Point<int>>> parse_input(const st
     return {toys, trees};
 }
 
-std::string format_output(const double &solution)
+std::string format_output(const long double &solution)
 {
     return std::to_string(solution) + '\n';
 }

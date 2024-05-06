@@ -96,7 +96,7 @@ template <typename T> class Point
         return x * other.y - y * other.x;
     }
 
-    double magnitude() const
+    long double magnitude() const
     {
         return std::sqrt(std::pow(x, 2) + std::pow(y, 2));
     }
