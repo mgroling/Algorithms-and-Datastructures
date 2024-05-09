@@ -53,6 +53,8 @@
         "ratio": "cpp",
         "set": "cpp",
         "queue": "cpp",
-        "cassert": "cpp"
+        "cassert": "cpp",
+        "list": "cpp",
+        "unordered_set": "cpp"
     }
 }
