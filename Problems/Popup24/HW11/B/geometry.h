@@ -268,11 +268,11 @@ double line_segment_distance(const std::pair<Point<T>, Point<T>> &l1, const std:
 // takes as input a closed polygon given as a vector of coordinates (x, y) reminder: in a closed
 // polygon the last point equals the first one
 // this method makes changes on the input vector during computation, but undoes these before returning
-template <typename T> double compute_signed_area_polygon(std::vector<Point<T>> &polygon)
+template <typename T> long double compute_signed_area_polygon(std::vector<Point<T>> &polygon)
 {
     assert(polygon[0] == polygon.back() &&
            "Assert failed in compute_signed_area_polygon: Polygon must be given in closed form.");
-    double area = 0;
+    long double area = 0;
 
     if (polygon.size() % 2 == 0)
     {
@@ -285,7 +285,7 @@ template <typename T> double compute_signed_area_polygon(std::vector<Point<T>> &
             polygon[i + 1].x * (polygon[i + 2].y - polygon[i].y) + polygon[i + 1].y * (polygon[i].x - polygon[i + 2].x);
     }
 
-    if (polygon.size() % 2 == 1)
+    if (polygon.size() % 2 == 0)
     {
         polygon.pop_back();
     }
