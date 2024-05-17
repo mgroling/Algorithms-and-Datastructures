@@ -20,22 +20,27 @@ std::string generateRandomDigits(int n)
 
 int main()
 {
-    // std::vector<std::string> input{"67.9"};
-    // std::vector<std::string> problem = parse_input(input);
-    // std::vector<std::string> solution = solve_problem(problem);
-    // std::cout << format_output(solution);
+    std::vector<std::string> input{"67.9"};
+    std::vector<std::string> problem = parse_input(input);
+    std::vector<std::string> solution = solve_problem(problem);
+    std::cout << format_output(solution);
 
-    std::string string = "37993";
-    std::cout << solve_test_case(string) << "\n";
-    std::cout << solve_test_case_naive(string) << "\n";
+    // std::string string = "88";
+    // std::cout << solve_test_case(string) << "\n";
+    // std::cout << solve_test_case_naive(string) << "\n";
 
-    // for (int i = 0; i < 5; i++)
+    // for (int j = 20; j <= 30; j++)
     // {
-    //     std::string string = generateRandomDigits(5);
-    //     if (solve_test_case(string) != solve_test_case_naive(string))
+    //     for (int i = 0; i < 1000; i++)
     //     {
-    //         std::cout << string << "\n";
+    //         std::string string = generateRandomDigits(j);
+    //         // std::cout << string << '\n';
+    //         if (solve_test_case(string) != solve_test_case_naive(string))
+    //         {
+    //             std::cout << string << "\n";
+    //         }
     //     }
+    //     std::cout << "finished run " << j << '\n';
     // }
 
     return 0;
